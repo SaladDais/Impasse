@@ -83,7 +83,7 @@ def main(filename=None):
             print("    %s: %s" % (key, value))
 
     # Finally release the model
-    impasse.release(scene)
+    impasse.release_import(scene)
 
 
 def usage():

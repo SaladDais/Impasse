@@ -20,40 +20,40 @@ logger = logging.getLogger("impasse")
 logger.addHandler(logging.NullHandler())
 
 
-class AssimpLib:
-    """
-    Assimp-Singleton
-    """
-    # TODO: Get rid of this.
-    load, load_mem, export, export_blob, release, dll = helper.search_library()
+_assimp_lib = helper.search_library()
 
 
-_assimp_lib = AssimpLib()
-
-
-class LoadedScene(Scene):
+class ImportedScene(Scene):
     def __init__(self, struct_val):
         super().__init__(struct_val)
         self._readonly = True
 
-    def __enter__(self) -> LoadedScene:
+    def __enter__(self) -> ImportedScene:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # TODO: ffi.gc() instead?
-        release(self)
+        release_import(self)
 
 
-def release(scene: LoadedScene):
+class OwnedExportDataBlob(ExportDataBlob):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        release_export_blob(self)
+
+
+def release_import(scene: ImportedScene):
     """Release resources of a loaded scene."""
-    _assimp_lib.release(scene.struct)
+    _assimp_lib.aiReleaseImport(scene.struct)
 
 
 def load(
     file_or_name: Union[str, BinaryIO],
     file_type: Optional[str] = None,
     processing=ProcessingStep.Triangulate,
-) -> LoadedScene:
+) -> ImportedScene:
     """
     Load a model into a scene. On failure throws AssimpError.
 
@@ -86,17 +86,15 @@ def load(
         if file_type is None:
             raise AssimpError('File type must be specified when passing file objects!')
         data = file_or_name.read()
-        model = _assimp_lib.load_mem(data,
-                                     len(data),
-                                     processing,
-                                     file_type)
+        model = _assimp_lib.aiImportFileFromMemory(
+            data, len(data), processing, file_type)
     else:
         # a filename string has been passed
-        model = _assimp_lib.load(file_or_name.encode(sys.getfilesystemencoding()), processing)
+        model = _assimp_lib.aiImportFile(file_or_name.encode(sys.getfilesystemencoding()), processing)
 
     if not model:
         raise AssimpError('Could not import file!')
-    return LoadedScene(model)
+    return ImportedScene(model)
 
 
 def export(
@@ -122,7 +120,7 @@ def export(
 
     """
 
-    export_status = _assimp_lib.export(
+    export_status = _assimp_lib.aiExportScene(
         scene.struct,
         file_type.encode("ascii"),
         filename.encode(sys.getfilesystemencoding()),
@@ -137,7 +135,7 @@ def export_blob(
     scene: Scene,
     file_type: str,
     processing=ProcessingStep.Triangulate
-) -> ExportDataBlob:
+) -> OwnedExportDataBlob:
     """
     Export a scene and return a blob in the correct format. On failure throws AssimpError.
 
@@ -155,7 +153,7 @@ def export_blob(
     ---------
     ExportDataBlob
     """
-    export_blob_ptr = _assimp_lib.export_blob(
+    export_blob_ptr = _assimp_lib.aiExportSceneToBlob(
         scene.struct,
         file_type.encode("ascii"),
         processing
@@ -163,4 +161,8 @@ def export_blob(
 
     if not export_blob_ptr:
         raise AssimpError('Could not export scene to blob!')
-    return ExportDataBlob(export_blob_ptr)
+    return OwnedExportDataBlob(export_blob_ptr)
+
+
+def release_export_blob(blob: ExportDataBlob):
+    _assimp_lib.aiReleaseExportBlob(blob.struct)

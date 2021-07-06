@@ -54,7 +54,7 @@ def get_bounding_box_for_node(scene: Scene, node: Node, bb_min, bb_max, transfor
     return bb_min, bb_max
 
 
-def try_load_functions(library_path, dll):
+def _try_load_functions(dll):
     """
     Try to bind to aiImportFile and aiReleaseImport
 
@@ -63,16 +63,15 @@ def try_load_functions(library_path, dll):
     """
 
     try:
-        load = dll.aiImportFile
-        release = dll.aiReleaseImport
-        load_mem = dll.aiImportFileFromMemory
-        export = dll.aiExportScene
-        export2blob = dll.aiExportSceneToBlob
+        _load = dll.aiImportFile
+        _release = dll.aiReleaseImport
+        _load_mem = dll.aiImportFileFromMemory
+        _export = dll.aiExportScene
+        _export2blob = dll.aiExportSceneToBlob
     except AttributeError:
         # OK, this is a library, but it doesn't have the functions we need
-        return None
-
-    return library_path, load, load_mem, export, export2blob, release, dll
+        return False
+    return True
 
 
 def get_search_config():
@@ -158,9 +157,8 @@ def search_library():
                     # errors. So just ignore any errors.
                     continue
                 # see if the functions we need are in the dll
-                loaded = try_load_functions(library_path, dll)
-                if loaded:
-                    candidates.append(loaded)
+                if _try_load_functions(dll):
+                    candidates.append((library_path, dll))
 
     if not candidates:
         # no library found
@@ -176,4 +174,4 @@ def search_library():
         # space now until gc kicks in?
 
         # XXX: take version postfix of the .so on linux?
-        return res[1:]
+        return res[1]
