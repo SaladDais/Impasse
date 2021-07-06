@@ -123,7 +123,7 @@ def export(
     """
 
     export_status = _assimp_lib.export(
-        scene,
+        scene.struct,
         file_type.encode("ascii"),
         filename.encode(sys.getfilesystemencoding()),
         processing,
