@@ -1,7 +1,7 @@
 Impasse Readme
 ===============
 
-A simple Python wrapper for Assimp using `cffi` to access the library.
+A simple Python wrapper for [Assimp](https://github.com/assimp/assimp) using `cffi` to access the library.
 Requires Python >= 3.8.
 
 It's largely based on [PyAssimp](https://github.com/assimp/assimp/tree/master/port/PyAssimp),
