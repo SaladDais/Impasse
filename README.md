@@ -1,6 +1,8 @@
 Impasse Readme
 ===============
 
+![Python Test Status](https://github.com/SaladDais/Impasse/workflows/Run%20Python%20Tests/badge.svg) [![codecov](https://codecov.io/gh/SaladDais/Impasse/branch/master/graph/badge.svg?token=yCiY7MUMW5)](https://codecov.io/gh/SaladDais/Impasse)
+
 A simple Python wrapper for [Assimp](https://github.com/assimp/assimp) using `cffi` to access the library.
 Requires Python >= 3.8.
 
@@ -11,8 +13,7 @@ all wrapper classes operate directly on the underlying C data structures.
 
 Note that impasse is not complete. Many ASSIMP features are missing.
 
-USAGE
------
+## Usage
 
 ### Complete example: 3D viewer
 
@@ -24,8 +25,7 @@ model using a shader-based OpenGL pipeline.
 To use it:
 
 ```bash
-$ cd scripts
-$ python ./3d_viewer_py3.py <path to your model>
+python ./scripts/3d_viewer_py3.py <path to your model>
 ```
 
 You can use this code as starting point in your applications.
@@ -44,7 +44,6 @@ vertex of the first mesh, you would do (proper error handling
 substituted by assertions ...):
 
 ```python3
-
 from impasse import load
 with load('hello.3ds') as scene:
 
@@ -53,36 +52,38 @@ with load('hello.3ds') as scene:
 
   assert len(mesh.vertices)
   print(mesh.vertices[0])
-
 ```
 
 Another example to list the 'top nodes' in a
 scene:
 
 ```python
-
 from impasse import load
 with load('hello.3ds') as scene:
 
   for c in scene.root_node.children:
       print(str(c))
-
 ```
 
-INSTALL
--------
+# Installing
 
 Install `impasse` by running:
 
 ```bash
-$ pip install -e .
+pip install impasse
+```
+
+or, if you want to install from the source directory:
+
+```bash
+pip install -e .
 ```
 
 Impasse requires an assimp dynamic library (`DLL` on Windows,
 `.so` on linux, `.dynlib` on macOS) in order to work. The default search directories are:
   - the current directory
   - on linux additionally: `/usr/lib`, `/usr/local/lib`,
-    `/usr/lib/x86_64-linux-gnu`
+    `/usr/lib/<CPU_ARCH>-linux-gnu`
 
 To build that library, refer to the Assimp master `INSTALL`
 instructions. To look in more places, edit `./impasse/helper.py`.
