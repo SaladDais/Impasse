@@ -12,7 +12,7 @@ import ast
 import collections
 import inspect
 import re
-from typing import NamedTuple, Dict, Optional
+from typing import NamedTuple, Dict, Optional, List
 
 import pyassimp.structs as s
 
@@ -40,7 +40,7 @@ class FieldTypeData(NamedTuple):
     array_len: Optional[int]
     python_type_name: Optional[str]
     builtin: bool
-    comments: str
+    comments: List[str]
 
 
 class StructData(NamedTuple):
@@ -99,7 +99,9 @@ def scan_structs():
                 comment_line = split_lines[lineno - 1].lstrip()
                 if not comment_line.startswith("# "):
                     comment_line = re.sub(r"^#", "# ", comment_line)
-                comment_line = comment_line.strip()
+                # Strip comment marker off
+                comment_line = comment_line.strip()[2:]
+                # Skip unnecessary comment about _fields_
                 if "_fields_" not in comment_line:
                     comment_lines.insert(0, comment_line)
                 lineno -= 1
@@ -208,18 +210,15 @@ def print_code():
             print(f"    SHAPE = {tuple_dets[1]!r}")
             print(f"    DTYPE = {tuple_dets[0]}")
         print("")
-        first_field = True
+        had_comment = False
         for field_name, type_data in fields_type_data.items():
+            if had_comment:
+                print("")
+                had_comment = False
             # Pythonize the field names
             call_spec = ""
             if type_data.python_name != type_data.name:
                 call_spec = f"name={field_name!r}"
-            comment_lines = type_data.comments
-            if comment_lines:
-                if not first_field:
-                    print()
-                for comment_line in comment_lines:
-                    print(f"    {comment_line}")
             type_sig = "Any"
             accessor_name = "SimpleAccessor"
             if type_data.python_type_name:
@@ -282,7 +281,21 @@ def print_code():
             if accessor is None:
                 accessor = f"{accessor_name}({call_spec})"
             print(f"    {type_data.python_name}: {type_sig} = {accessor}")
-            first_field = False
+
+            # Docstrings must _follow_ the attribute.
+            comment_lines = type_data.comments
+            if comment_lines:
+                had_comment = True
+                if len(comment_lines) == 1:
+                    print(f'    """{comment_lines[0]}"""')
+                else:
+                    print('    """')
+                    for comment_line in comment_lines:
+                        if comment_line.strip():
+                            print(f"    {comment_line}")
+                        else:
+                            print("")
+                    print('    """')
         # TODO: Mix-in classes instead?
         if "mName" in fields_type_data:
             print("")
