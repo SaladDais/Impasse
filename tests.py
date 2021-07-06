@@ -33,7 +33,7 @@ class ImpasseTests(unittest.TestCase):
             self.assertIsNotNone(scene.root_node)
         finally:
             if scene:
-                impasse.release(scene)
+                impasse.release_import(scene)
 
     def test_materials_mapping(self):
         with impasse.load(TEST_COLLADA) as scene:
@@ -54,8 +54,8 @@ class ImpasseTests(unittest.TestCase):
 
     def test_export_blob(self):
         with impasse.load(TEST_COLLADA) as scene:
-            blob = impasse.export_blob(scene, "collada")
-            self.assertTrue(blob.data.startswith(b"<?xml"))
+            with impasse.export_blob(scene, "collada") as blob:
+                self.assertTrue(blob.data.startswith(b"<?xml"))
 
 
 if __name__ == "__main__":
