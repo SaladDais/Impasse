@@ -6,7 +6,7 @@ This is the main-module of Impasse.
 from __future__ import annotations
 
 import sys
-from typing import Optional, Union, Protocol, Callable
+from typing import Optional, Union, BinaryIO
 import logging
 
 from . import helper
@@ -49,12 +49,8 @@ def release(scene: LoadedScene):
     _assimp_lib.release(scene.struct)
 
 
-class _Readable(Protocol):
-    read: Callable[[], bytes]
-
-
 def load(
-    file_or_name: Union[str, _Readable],
+    file_or_name: Union[str, BinaryIO],
     file_type: Optional[str] = None,
     processing=ProcessingStep.Triangulate,
 ) -> LoadedScene:
