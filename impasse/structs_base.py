@@ -223,18 +223,25 @@ class StaticSequence(BaseSequence):
         return self.size
 
 
-class SimpleAccessor(Generic[_T]):
-    """Accessor that doesn't need any context outside its own value"""
+class BaseAccessor(Generic[_T], abc.ABC):
+    __slots__ = ("name",)
 
-    __slots__ = ("name", "adapter")
-
-    def __init__(self, name: Optional[str] = None, adapter=None):
+    def __init__(self, name: Optional[str] = None):
         self.name = name
-        self.adapter = adapter or IdentityAdapter
 
-    def __set_name__(self, owner, name):
+    def __set_name__(self, owner, name: str):
         if self.name is None:
             self.name = name
+
+
+class SimpleAccessor(BaseAccessor[_T]):
+    """Accessor that doesn't need any context outside its own value"""
+
+    __slots__ = ("adapter",)
+
+    def __init__(self, name: Optional[str] = None, adapter=None):
+        super().__init__(name)
+        self.adapter = adapter or IdentityAdapter
 
     def _unwrap_adapter(self):
         if isinstance(self.adapter, LazyStruct):
@@ -252,11 +259,11 @@ class SimpleAccessor(Generic[_T]):
         self.adapter.to_c(ffi.addressof(obj.struct, self.name), val)
 
 
-class StaticSequenceAccessor(Generic[_SEQ_T]):
-    __slots__ = ("name", "size", "elem_adapter")
+class StaticSequenceAccessor(BaseAccessor[_SEQ_T]):
+    __slots__ = ("size", "elem_adapter")
 
     def __init__(self, name: str, size: int, elem_adapter: Type[_T]):
-        self.name = name
+        super().__init__(name)
         self.size = size
         self.elem_adapter = elem_adapter
 
@@ -268,11 +275,11 @@ class StaticSequenceAccessor(Generic[_SEQ_T]):
         )
 
 
-class DynamicSequenceAccessor(Generic[_SEQ_T]):
-    __slots__ = ("name", "num_name", "elem_adapter")
+class DynamicSequenceAccessor(BaseAccessor[_SEQ_T]):
+    __slots__ = ("num_name", "elem_adapter")
 
     def __init__(self, name: str, num_name: str, elem_adapter):
-        self.name = name
+        super().__init__(name)
         self.num_name = num_name
         self.elem_adapter = elem_adapter
 
@@ -303,10 +310,10 @@ class VertexPropSequenceAccessor(StaticSequenceAccessor):
         )
 
 
-class TextureDataAccessor(SimpleAccessor):
+class TextureDataAccessor(SimpleAccessor[Union[bytearray, numpy.ndarray]]):
     __slots__ = ()
 
-    def __get__(self, obj: Texture, owner: Optional[Type] = None) -> Union[bytearray, numpy.array]:
+    def __get__(self, obj: Texture, owner: Optional[Type] = None) -> Union[bytearray, numpy.ndarray]:
         pcdata = obj.struct.pcData
         assert pcdata
         if obj.height:
@@ -324,12 +331,29 @@ class TextureDataAccessor(SimpleAccessor):
         raise NotImplementedError()
 
 
+class BoundedBufferAccessor(SimpleAccessor[bytearray]):
+    __slots__ = ("size_name",)
+
+    def __init__(self, name: str, size_name: str):
+        super().__init__(name)
+        self.size_name = size_name
+
+    def __get__(self, obj: SerializableStruct, owner: Optional[Type] = None) -> bytearray:
+        # Compressed data
+        buf_ptr = getattr(obj.struct, self.name)
+        size = getattr(obj.struct, self.size_name)
+        return bytearray(ffi.buffer(buf_ptr, size))
+
+    def __set__(self, instance, value):
+        raise NotImplementedError()
+
+
 # Metadata-specific accessors and wrappers
 
 METADATA_VAL = Union[float, int, bool, str, Any]  # How to represent cffi cdata?
 
 
-class MetadataEntryDataAccessor(SimpleAccessor):
+class MetadataEntryDataAccessor(SimpleAccessor[METADATA_VAL]):
     __slots__ = ()
 
     _BASIC_TYPES = {
@@ -387,7 +411,7 @@ class MetadataMapping(Mapping[str, METADATA_VAL]):
 
 # Materials-specific accessors and wrappers
 
-class MaterialPropertyDataAccessor(SimpleAccessor):
+class MaterialPropertyDataAccessor(SimpleAccessor[Any]):
     __slots__ = ()
 
     ARRAY_ELEM_TYPES = {

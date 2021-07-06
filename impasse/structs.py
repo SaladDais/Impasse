@@ -1499,7 +1499,7 @@ class ExportDataBlob(SerializableStruct):
     size: int = SimpleAccessor()
     """Size of the data in bytes"""
 
-    data: Optional[Any] = SimpleAccessor()
+    data: Union[bytearray] = BoundedBufferAccessor('data', 'size')
     """The data."""
 
     name: str = SimpleAccessor(adapter=StringAdapter)

@@ -279,6 +279,9 @@ def print_code():
             elif struct_cls_name == "MetadataEntry" and field_name == "mData":
                 type_sig = f"Any"
                 accessor = "MetadataEntryDataAccessor()"
+            elif struct_cls_name == "ExportDataBlob" and field_name == "data":
+                type_sig = "Union[bytearray]"
+                accessor = "BoundedBufferAccessor('data', 'size')"
             elif type_data.full_sig.startswith("struct "):
                 if call_spec:
                     call_spec += ", "

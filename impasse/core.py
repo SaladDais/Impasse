@@ -137,7 +137,7 @@ def export_blob(
     scene: Scene,
     file_type: str,
     processing=ProcessingStep.Triangulate
-):
+) -> ExportDataBlob:
     """
     Export a scene and return a blob in the correct format. On failure throws AssimpError.
 
