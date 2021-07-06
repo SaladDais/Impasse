@@ -80,7 +80,7 @@ class SerializableStruct(CSerializableBase):
         return cls.from_c(ffi.cast(ffi.getctype(cls.C_TYPE, "*"), address))
 
     def get_scene(self) -> Optional[Scene]:
-        if self.__class__.__name__ == "Scene":
+        if self.C_TYPE == "struct aiScene":
             return self  # noqa
         return self._scene
 
@@ -504,4 +504,9 @@ const struct aiExportDataBlob *aiExportSceneToBlob(
 );
 
 void aiReleaseExportBlob(const struct aiExportDataBlob *pData);
+
+void aiCopyScene(const struct aiScene *pIn,
+        struct aiScene **pOut);
+
+void aiFreeScene(const struct aiScene *pIn);
 """
