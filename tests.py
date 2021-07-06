@@ -52,6 +52,11 @@ class ImpasseTests(unittest.TestCase):
                 impasse.export(scene, export_file.name, "collada")
                 self.assertNotEqual(os.lstat(export_file.name).st_size, 0)
 
+    def test_export_blob(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            blob = impasse.export_blob(scene, "collada")
+            self.assertTrue(blob.data.startswith(b"<?xml"))
+
 
 if __name__ == "__main__":
     unittest.main()
