@@ -11,7 +11,7 @@ def readme():
 setup(
     name='impasse',
     # Version chosen for parity with Assimp since we need ABI compatibility
-    version='5.0.1',
+    version='5.0.2',
     license='BSD',
     description='Alternate Python bindings for the Open Asset Import Library (ASSIMP)',
     long_description=readme(),
