@@ -26,7 +26,7 @@ setup(
         # ('share/examples/impasse', ['scripts/' + f for f in os.listdir('scripts/')]),
     ],
     install_requires=['numpy', 'cffi'],
-    python_requires='>=3.8',
+    python_requires='>=3.7',
     zip_safe=False,
     tests_require=[
         "pytest",

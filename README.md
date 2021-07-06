@@ -4,7 +4,7 @@ Impasse Readme
 ![Python Test Status](https://github.com/SaladDais/Impasse/workflows/Run%20Python%20Tests/badge.svg) [![codecov](https://codecov.io/gh/SaladDais/Impasse/branch/master/graph/badge.svg?token=yCiY7MUMW5)](https://codecov.io/gh/SaladDais/Impasse)
 
 A simple Python wrapper for [Assimp](https://github.com/assimp/assimp) using `cffi` to access the library.
-Requires Python >= 3.8.
+Requires Python >= 3.7.
 
 It's largely based on [PyAssimp](https://github.com/assimp/assimp/tree/master/port/PyAssimp),
 Assimp's official Python port. In contrast to PyAssimp, it strictly targets modern Python 3 and
