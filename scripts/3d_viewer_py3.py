@@ -23,6 +23,8 @@ from typing import Optional, Union
 import math
 import random
 
+from impasse import ImportedScene
+from impasse.core import CopiedScene, release_import, release_scene_copy
 from impasse.helper import get_bounding_box
 
 logger = logging.getLogger("impasse")
@@ -433,10 +435,10 @@ class DefaultCamera:
     def __init__(self, w, h, fov):
         self.name = "default camera"
         self.type = CAMERA
-        self.clipplanenear = DEFAULT_CLIP_PLANE_NEAR
-        self.clipplanefar = DEFAULT_CLIP_PLANE_FAR
+        self.clip_plane_near = DEFAULT_CLIP_PLANE_NEAR
+        self.clip_plane_far = DEFAULT_CLIP_PLANE_FAR
         self.aspect = w / h
-        self.horizontalfov = fov * math.pi / 180
+        self.horizontal_fov = fov * math.pi / 180
         self.transformation = numpy.array([[0.68, -0.32, 0.65, 7.48],
                                            [0.73, 0.31, -0.61, -6.51],
                                            [-0.01, 0.89, 0.44, 5.34],
@@ -474,7 +476,8 @@ class Impasse3DViewer:
             self.set_shaders_v120()
             self.prepare_shaders()
 
-        self.scene: Optional[Scene] = None
+        self.inner_scene: Optional[ImportedScene] = None
+        self.scene: Optional[CopiedScene] = None
         self.meshes = {}  # stores the OpenGL vertex/faces/normals buffers pointers
 
         self.node2colorid = {}  # stores a color ID for each node. Useful for mouse picking and visibility checking
@@ -646,16 +649,16 @@ class Impasse3DViewer:
             logger.info("Added camera <%s>" % node.name)
             logger.info("Camera position: %.3f, %.3f, %.3f" % tuple(node.transformation[:, 3][:3].tolist()))
             self.cameras.append(node)
-            node.clipplanenear = cam.clipplanenear
-            node.clipplanefar = cam.clipplanefar
+            node.clip_plane_near = cam.clip_plane_near
+            node.clip_plane_far = cam.clip_plane_far
 
-            if numpy.allclose(cam.lookat, [0, 0, -1]) and numpy.allclose(cam.up, [0, 1, 0]):  # Cameras in .blend files
+            if numpy.allclose(cam.look_at, [0, 0, -1]) and numpy.allclose(cam.up, [0, 1, 0]):  # Cameras in .blend files
 
                 # Rotate by 180deg around X to have Z pointing forward
                 node.transformation = numpy.dot(node.transformation, ROTATION_180_X)
             else:
                 raise RuntimeError(
-                    "I do not know how to normalize this camera orientation: lookat=%s, up=%s" % (cam.lookat, cam.up))
+                    "I do not know how to normalize this camera orientation: lookat=%s, up=%s" % (cam.look_at, cam.up))
 
             if cam.aspect == 0.0:
                 logger.warning("Camera aspect not set. Setting to default 4:3")
@@ -663,18 +666,21 @@ class Impasse3DViewer:
             else:
                 node.aspect = cam.aspect
 
-            node.horizontalfov = cam.horizontalfov
+            node.horizontal_fov = cam.horizontal_fov
 
         for child in node.children:
             self.glize(scene, child)
 
     def load_model(self, path, postprocess=ProcessingPreset.TargetRealtime_MaxQuality):
         logger.info("Loading model:" + path + "...")
-
+        self.cleanup_scene()
         if postprocess:
-            self.scene = impasse.load(path, processing=postprocess)
+            scene = impasse.load(path, processing=postprocess)
         else:
-            self.scene = impasse.load(path)
+            scene = impasse.load(path)
+        self.inner_scene = scene
+        # Need a mutable copy of the scene
+        self.scene = scene.copy()
         logger.info("Done.")
 
         scene = self.scene
@@ -694,6 +700,14 @@ class Impasse3DViewer:
 
         # Finally release the model
         logger.info("Ready for 3D rendering!")
+
+    def cleanup_scene(self):
+        if self.scene:
+            release_scene_copy(self.scene)
+            self.scene = None
+        if self.inner_scene:
+            release_import(self.inner_scene)
+            self.inner_scene = None
 
     def cycle_cameras(self):
 
@@ -715,10 +729,10 @@ class Impasse3DViewer:
         if not camera:
             camera = self.current_cam
 
-        znear = camera.clipplanenear or DEFAULT_CLIP_PLANE_NEAR
-        zfar = camera.clipplanefar or DEFAULT_CLIP_PLANE_FAR
+        znear = camera.clip_plane_near or DEFAULT_CLIP_PLANE_NEAR
+        zfar = camera.clip_plane_far or DEFAULT_CLIP_PLANE_FAR
         aspect = camera.aspect
-        fov = camera.horizontalfov
+        fov = camera.horizontal_fov
 
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
@@ -1269,7 +1283,7 @@ def main(model, width, height):
 
         # Make sure we do not go over 30fps
         clock.tick(30)
-
+    app.cleanup_scene()
     logger.info("Quitting! Bye bye!")
 
 
