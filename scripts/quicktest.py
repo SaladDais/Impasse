@@ -6,21 +6,20 @@ This module uses the sample.py script to load all test models it finds.
 
 Note: this is not an exhaustive test suite, it does not check the
 data structures in detail. It just verifies whether basic
-loading and querying of 3d models using pyassimp works.
+loading and querying of 3d models using impasse works.
 """
 
 import os
-import sys
-
-# Make the development (ie. GIT repo) version of PyAssimp available for import.
-sys.path.insert(0, '..')
+import os.path
 
 import sample
-from pyassimp import errors
+from impasse import errors
+
+here = os.path.abspath(os.path.dirname(__file__))
 
 # Paths to model files.
-basepaths = [os.path.join('..', '..', '..', 'test', 'models'),
-             os.path.join('..', '..', '..', 'test', 'models-nonbsd')]
+basepaths = [os.path.join(here, '..', '..', '..', 'test', 'models'),
+             os.path.join(here, '..', '..', '..', 'test', 'models-nonbsd')]
 
 # Valid extensions for 3D model files.
 extensions = ['.3ds', '.x', '.lwo', '.obj', '.md5mesh', '.dxf', '.ply', '.stl',
@@ -34,9 +33,13 @@ def run_tests():
         for root, dirs, files in os.walk(path):
             for afile in files:
                 base, ext = os.path.splitext(afile)
+                # Don't want to trigger an OOM!
+                if "/invalid" in root:
+                    continue
                 if ext in extensions:
+                    full_path = os.path.join(root, afile)
                     try:
-                        sample.main(os.path.join(root, afile))
+                        sample.main(full_path)
                         ok += 1
                     except errors.AssimpError as error:
                         # Assimp error is fine; this is a controlled case.

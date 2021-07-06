@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-""" This program loads a model with PyASSIMP, and display it.
+""" This program loads a model with Impasse, and display it.
 
 Based on:
 - pygame code from http://3dengine.org/Spectator_%28PyOpenGL%29
@@ -9,15 +9,23 @@ Based on:
 - http://www.songho.ca/opengl/gl_transform.html
 - http://code.activestate.com/recipes/325391/
 - ASSIMP's C++ SimpleOpenGL viewer
+- The same script from PyAssimp
 
-Authors: Séverin Lemaignan, 2012-2016
+Authors:
+Séverin Lemaignan, 2012-2016
+Salad Dais 2021
 """
-import sys
 import logging
+import sys
 
 from functools import reduce
+from typing import Optional, Union
+import math
+import random
 
-logger = logging.getLogger("pyassimp")
+from impasse.helper import get_bounding_box
+
+logger = logging.getLogger("impasse")
 gllogger = logging.getLogger("OpenGL")
 gllogger.setLevel(logging.WARNING)
 logging.basicConfig(level=logging.INFO)
@@ -35,14 +43,13 @@ from OpenGL.GL import shaders
 import pygame
 import pygame.font
 import pygame.image
-
-import math, random
+import numpy
 from numpy import linalg
 
-import pyassimp
-from pyassimp.postprocess import *
-from pyassimp.helper import *
+import impasse
 import transformations
+from impasse.constants import ProcessingPreset
+from impasse.structs import Scene, Camera, Node
 
 ROTATION_180_X = numpy.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]], dtype=numpy.float32)
 
@@ -411,21 +418,12 @@ DEFAULT_CLIP_PLANE_NEAR = 0.001
 DEFAULT_CLIP_PLANE_FAR = 1000.0
 
 
-def get_world_transform(scene, node):
-    if node == scene.rootnode:
-        return numpy.identity(4, dtype=numpy.float32)
-
-    parents = reversed(_get_parent_chain(scene, node, []))
-    parent_transform = reduce(numpy.dot, [p.transformation for p in parents])
-    return numpy.dot(parent_transform, node.transformation)
-
-
 def _get_parent_chain(scene, node, parents):
     parent = node.parent
 
     parents.append(parent)
 
-    if parent == scene.rootnode:
+    if parent == scene.root_node:
         return parents
 
     return _get_parent_chain(scene, parent, parents)
@@ -450,8 +448,8 @@ class DefaultCamera:
         return self.name
 
 
-class PyAssimp3DViewer:
-    base_name = "PyASSIMP 3D viewer"
+class Impasse3DViewer:
+    base_name = "Impasse 3D viewer"
 
     def __init__(self, model, w=1024, h=768):
 
@@ -476,7 +474,7 @@ class PyAssimp3DViewer:
             self.set_shaders_v120()
             self.prepare_shaders()
 
-        self.scene = None
+        self.scene: Optional[Scene] = None
         self.meshes = {}  # stores the OpenGL vertex/faces/normals buffers pointers
 
         self.node2colorid = {}  # stores a color ID for each node. Useful for mouse picking and visibility checking
@@ -496,7 +494,7 @@ class PyAssimp3DViewer:
         self.load_model(model)
 
         # user interactions
-        self.focal_point = [0, 0, 0]
+        self.focal_point = numpy.array([0, 0, 0])
         self.is_rotating = False
         self.is_panning = False
         self.is_zooming = False
@@ -521,7 +519,7 @@ class PyAssimp3DViewer:
 
     def prepare_shaders(self):
 
-        ### Base shader
+        # Base shader
         vertex = shaders.compileShader(self.BASIC_VERTEX_SHADER, GL_VERTEX_SHADER)
         fragment = shaders.compileShader(self.BASIC_FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
 
@@ -535,7 +533,7 @@ class PyAssimp3DViewer:
                                   ('a_vertex',
                                    'a_normal'), self.shader)
 
-        ### Flat shader
+        # Flat shader
         flatvertex = shaders.compileShader(self.FLAT_VERTEX_SHADER, GL_VERTEX_SHADER)
         self.flatshader = shaders.compileProgram(flatvertex, fragment)
 
@@ -544,7 +542,7 @@ class PyAssimp3DViewer:
                                    'u_materialDiffuse',),
                                   ('a_vertex',), self.flatshader)
 
-        ### Silhouette shader
+        # Silhouette shader
         silh_vertex = shaders.compileShader(self.SILHOUETTE_VERTEX_SHADER, GL_VERTEX_SHADER)
         self.silhouette_shader = shaders.compileProgram(silh_vertex, fragment)
 
@@ -557,7 +555,7 @@ class PyAssimp3DViewer:
                                   ('a_vertex',
                                    'a_normal'), self.silhouette_shader)
 
-        ### Gooch shader
+        # Gooch shader
         gooch_vertex = shaders.compileShader(self.GOOCH_VERTEX_SHADER, GL_VERTEX_SHADER)
         gooch_fragment = shaders.compileShader(self.GOOCH_FRAGMENT_SHADER, GL_FRAGMENT_SHADER)
         self.gooch_shader = shaders.compileProgram(gooch_vertex, gooch_fragment)
@@ -595,26 +593,27 @@ class PyAssimp3DViewer:
     @staticmethod
     def prepare_gl_buffers(mesh):
 
-        mesh.gl = {}
+        gl = {}
 
         # Fill the buffer for vertex and normals positions
         v = numpy.array(mesh.vertices, 'f')
         n = numpy.array(mesh.normals, 'f')
 
-        mesh.gl["vbo"] = vbo.VBO(numpy.hstack((v, n)))
+        gl["vbo"] = vbo.VBO(numpy.hstack((v, n)))
 
         # Fill the buffer for vertex positions
-        mesh.gl["faces"] = glGenBuffers(1)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.gl["faces"])
+        gl["faces"] = glGenBuffers(1)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl["faces"])
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                     numpy.array(mesh.faces, dtype=numpy.int32),
+                     numpy.array([x.indices for x in mesh.faces], dtype=numpy.int32),
                      GL_STATIC_DRAW)
 
-        mesh.gl["nbfaces"] = len(mesh.faces)
+        gl["nbfaces"] = len(mesh.faces)
 
         # Unbind buffers
         glBindBuffer(GL_ARRAY_BUFFER, 0)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
+        return gl
 
     @staticmethod
     def get_rgb_from_colorid(colorid):
@@ -634,12 +633,8 @@ class PyAssimp3DViewer:
     def glize(self, scene, node):
 
         logger.info("Loading node <%s>" % node)
-        node.selected = True if self.currently_selected and self.currently_selected == node else False
-
-        node.transformation = node.transformation.astype(numpy.float32)
 
         if node.meshes:
-            node.type = MESH
             colorid = self.get_color_id()
             self.colorid2node[colorid] = node
             self.node2colorid[node.name] = colorid
@@ -648,7 +643,6 @@ class PyAssimp3DViewer:
 
             # retrieve the ASSIMP camera object
             [cam] = [c for c in scene.cameras if c.name == node.name]
-            node.type = CAMERA
             logger.info("Added camera <%s>" % node.name)
             logger.info("Camera position: %.3f, %.3f, %.3f" % tuple(node.transformation[:, 3][:3].tolist()))
             self.cameras.append(node)
@@ -671,19 +665,16 @@ class PyAssimp3DViewer:
 
             node.horizontalfov = cam.horizontalfov
 
-        else:
-            node.type = ENTITY
-
         for child in node.children:
             self.glize(scene, child)
 
-    def load_model(self, path, postprocess=aiProcessPreset_TargetRealtime_MaxQuality):
+    def load_model(self, path, postprocess=ProcessingPreset.TargetRealtime_MaxQuality):
         logger.info("Loading model:" + path + "...")
 
         if postprocess:
-            self.scene = pyassimp.load(path, processing=postprocess)
+            self.scene = impasse.load(path, processing=postprocess)
         else:
-            self.scene = pyassimp.load(path)
+            self.scene = impasse.load(path)
         logger.info("Done.")
 
         scene = self.scene
@@ -697,12 +688,11 @@ class PyAssimp3DViewer:
         self.scene_center = [(a + b) / 2. for a, b in zip(self.bb_min, self.bb_max)]
 
         for index, mesh in enumerate(scene.meshes):
-            self.prepare_gl_buffers(mesh)
+            self.meshes[index] = self.prepare_gl_buffers(mesh)
 
-        self.glize(scene, scene.rootnode)
+        self.glize(scene, scene.root_node)
 
         # Finally release the model
-        pyassimp.release(scene)
         logger.info("Ready for 3D rendering!")
 
     def cycle_cameras(self):
@@ -761,7 +751,7 @@ class PyAssimp3DViewer:
         glUniformMatrix4fv(self.flatshader.u_viewProjectionMatrix, 1, GL_TRUE,
                            numpy.dot(self.projection_matrix, self.view_matrix))
 
-        self.recursive_render(self.scene.rootnode, self.flatshader, mode=COLORS)
+        self.recursive_render(self.scene.root_node, self.flatshader, mode=COLORS)
 
         glUseProgram(0)
 
@@ -780,7 +770,7 @@ class PyAssimp3DViewer:
         glReadPixels(0, 0, self.w, self.h, GL_RGB, GL_UNSIGNED_BYTE, buf)
 
         # Reinterpret the RGB pixel buffer as a 1-D array of 24bits colors
-        a = numpy.ndarray(len(buf), numpy.dtype('>u1'), buf)
+        a = numpy.ndarray((len(buf),), numpy.dtype('>u1'), buf)
         colors = numpy.zeros(len(buf) // 3, numpy.dtype('<u4'))
         for i in range(3):
             colors.view(dtype='>u1')[i::4] = a.view(dtype='>u1')[i::3]
@@ -802,27 +792,11 @@ class PyAssimp3DViewer:
 
         self.render_grid()
 
-        self.recursive_render(self.scene.rootnode, None, mode=HELPERS)
+        self.recursive_render(self.scene.root_node, None, mode=HELPERS)
 
-        ### First, the silhouette
+        # First, the silhouette
 
-        if False:
-            shader = self.silhouette_shader
-
-            # glDepthMask(GL_FALSE)
-            glCullFace(GL_FRONT)  # cull front faces
-
-            glUseProgram(shader)
-            glUniform1f(shader.u_bordersize, 0.01)
-
-            glUniformMatrix4fv(shader.u_viewProjectionMatrix, 1, GL_TRUE,
-                               numpy.dot(self.projection_matrix, self.view_matrix))
-
-            self.recursive_render(self.scene.rootnode, shader, mode=SILHOUETTE)
-
-            glUseProgram(0)
-
-        ### Then, inner shading
+        # Then, inner shading
         # glDepthMask(GL_TRUE)
         glCullFace(GL_BACK)
 
@@ -833,7 +807,7 @@ class PyAssimp3DViewer:
             glUseProgram(shader)
             glUniform3f(shader.u_lightPos, -.5, -.5, .5)
 
-            ##### GOOCH specific
+            # GOOCH specific
             glUniform3f(shader.u_coolColor, 159.0 / 255, 148.0 / 255, 255.0 / 255)
             glUniform3f(shader.u_warmColor, 255.0 / 255, 75.0 / 255, 75.0 / 255)
             glUniform1f(shader.u_alpha, .25)
@@ -847,7 +821,7 @@ class PyAssimp3DViewer:
         glUniformMatrix4fv(shader.u_viewProjectionMatrix, 1, GL_TRUE,
                            numpy.dot(self.projection_matrix, self.view_matrix))
 
-        self.recursive_render(self.scene.rootnode, shader)
+        self.recursive_render(self.scene.root_node, shader)
 
         glUseProgram(0)
 
@@ -963,7 +937,15 @@ class PyAssimp3DViewer:
             glVertex3f(10.0, i, 0.0)
         glEnd()
 
-    def recursive_render(self, node, shader, mode=BASE, with_normals=True):
+    def get_world_transform(self, scene: Scene, node):
+        if node == scene.root_node or not hasattr(node, 'transformation'):
+            return numpy.identity(4, dtype=numpy.float32)
+
+        parents = reversed(_get_parent_chain(scene, node, []))
+        parent_transform = reduce(numpy.dot, [p.transformation for p in parents])
+        return numpy.dot(parent_transform, node.transformation)
+
+    def recursive_render(self, node: Union[Node, Camera], shader, mode=BASE, with_normals=True):
         """ Main recursive rendering method.
         """
 
@@ -972,37 +954,32 @@ class PyAssimp3DViewer:
         if mode == COLORS:
             normals = False
 
-
-        if not hasattr(node, "selected"):
-            node.selected = False
-
-        m = get_world_transform(self.scene, node)
+        m = self.get_world_transform(self.scene, node)
 
         # HELPERS mode
         ###
         if mode == HELPERS:
-            # if node.type == ENTITY:
             self.render_axis(m,
-                             label=node.name if node != self.scene.rootnode else None,
-                             selected=node.selected if hasattr(node, "selected") else False)
+                             label=node.name if node != self.scene.root_node else None,
+                             selected=node == self.currently_selected)
 
-            if node.type == CAMERA:
+            if isinstance(node, Camera):
                 self.render_camera(node, m)
 
             for child in node.children:
-                    self.recursive_render(child, shader, mode)
+                self.recursive_render(child, shader, mode)
 
             return
 
         # Mesh rendering modes
         ###
-        if node.type == MESH:
+        if isinstance(node, Node):
 
-            for mesh in node.meshes:
-
+            for mesh_idx in node.meshes:
+                mesh = self.scene.meshes[mesh_idx]
                 stride = 24  # 6 * 4 bytes
 
-                if node.selected and mode == SILHOUETTE:
+                if node == self.currently_selected and mode == SILHOUETTE:
                     glUniform4f(shader.u_materialDiffuse, 1.0, 0.0, 0.0, 1.0)
                     glUniformMatrix4fv(shader.u_modelViewMatrix, 1, GL_TRUE,
                                        numpy.dot(self.view_matrix, m))
@@ -1015,10 +992,11 @@ class PyAssimp3DViewer:
                     elif mode == SILHOUETTE:
                         glUniform4f(shader.u_materialDiffuse, .0, .0, .0, 1.0)
                     else:
-                        if node.selected:
-                            diffuse = (1.0, 0.0, 0.0, 1.0)  # selected nodes in red
+                        if node == self.currently_selected:
+                            diffuse = [1.0, 0.0, 0.0, 1.0]  # selected nodes in red
                         else:
-                            diffuse = mesh.material.properties["diffuse"]
+                            material = self.scene.materials[mesh.material_index]
+                            diffuse = list(material.as_mapping()["$clr.diffuse"])
                         if len(diffuse) == 3:  # RGB instead of expected RGBA
                             diffuse.append(1.0)
                         glUniform4f(shader.u_materialDiffuse, *diffuse)
@@ -1031,7 +1009,8 @@ class PyAssimp3DViewer:
 
                 glUniformMatrix4fv(shader.u_modelMatrix, 1, GL_TRUE, m)
 
-                vbo = mesh.gl["vbo"]
+                mesh_gl = self.meshes[mesh_idx]
+                vbo = mesh_gl["vbo"]
                 vbo.bind()
 
                 glEnableVertexAttribArray(shader.a_vertex)
@@ -1049,8 +1028,8 @@ class PyAssimp3DViewer:
                         3, GL_FLOAT, False, stride, vbo + 12
                     )
 
-                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.gl["faces"])
-                glDrawElements(GL_TRIANGLES, mesh.gl["nbfaces"] * 3, GL_UNSIGNED_INT, None)
+                glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh_gl["faces"])
+                glDrawElements(GL_TRIANGLES, mesh_gl["nbfaces"] * 3, GL_UNSIGNED_INT, None)
 
                 vbo.unbind()
                 glDisableVertexAttribArray(shader.a_vertex)
@@ -1063,7 +1042,6 @@ class PyAssimp3DViewer:
         for child in node.children:
             self.recursive_render(child, shader, mode)
 
-
     def switch_to_overlay(self):
         glPushMatrix()
         self.set_overlay_projection()
@@ -1074,16 +1052,6 @@ class PyAssimp3DViewer:
 
     def select_node(self, node):
         self.currently_selected = node
-        self.update_node_select(self.scene.rootnode)
-
-    def update_node_select(self, node):
-        if node is self.currently_selected:
-            node.selected = True
-        else:
-            node.selected = False
-
-        for child in node.children:
-            self.update_node_select(child)
 
     def loop(self):
 
@@ -1262,8 +1230,8 @@ class PyAssimp3DViewer:
         # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
         font = pygame.font.Font(None, size)
-        text_surface = font.render(text, True, (10, 10, 10, 255),
-                                  (255 * 0.18, 255 * 0.18, 255 * 0.18, 0))
+        text_surface = font.render(
+            text, True, (10, 10, 10, 255), (46, 46, 46, 0))
         text_data = pygame.image.tostring(text_surface, "RGBA", True)
         glRasterPos3d(x, y, z)
         glDrawPixels(text_surface.get_width(),
@@ -1275,7 +1243,7 @@ class PyAssimp3DViewer:
 
 
 def main(model, width, height):
-    app = PyAssimp3DViewer(model, w=width, h=height)
+    app = Impasse3DViewer(model, w=width, h=height)
 
     clock = pygame.time.Clock()
 
