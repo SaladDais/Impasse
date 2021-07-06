@@ -1,4 +1,5 @@
 import os.path
+import tempfile
 import unittest
 
 import impasse
@@ -44,6 +45,12 @@ class ImpasseTests(unittest.TestCase):
         with impasse.load(TEST_COLLADA) as scene:
             metadata = scene.metadata.as_mapping()
             self.assertEqual(metadata['Created'], '2006-06-21T21:15:16Z')
+
+    def test_export(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            with tempfile.NamedTemporaryFile() as export_file:
+                impasse.export(scene, export_file.name, "collada")
+                self.assertNotEqual(os.lstat(export_file.name).st_size, 0)
 
 
 if __name__ == "__main__":
