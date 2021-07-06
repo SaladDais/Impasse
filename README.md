@@ -100,7 +100,7 @@ Testing with the same `quicktest.py` script against assimp's test model director
 ## Impasse
 
 ```
-** Loaded 169 models, got controlled errors for 28 files
+** Loaded 169 models, got controlled errors for 28 files, 0 uncontrolled
 
 real	0m1.643s
 user	0m1.912s
@@ -110,7 +110,7 @@ sys	0m0.531s
 ## PyAssimp
 
 ```
-** Loaded 165 models, got controlled errors for 28 files
+** Loaded 165 models, got controlled errors for 28 files, 4 uncontrolled
 
 real	0m7.607s
 user	0m7.746s

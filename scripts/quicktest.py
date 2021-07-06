@@ -25,7 +25,7 @@ extensions = ['.3ds', '.x', '.lwo', '.obj', '.md5mesh', '.dxf', '.ply', '.stl',
 
 
 def run_tests(assimp_repo_path: str):
-    ok, err = 0, 0
+    ok, err, uncontrolled_err = 0, 0, 0
     paths = [os.path.join(assimp_repo_path, b) for b in BASE_PATHS]
     for path in paths:
         print("Looking for models in %s..." % path)
@@ -45,10 +45,11 @@ def run_tests(assimp_repo_path: str):
                         print(error)
                         err += 1
                     except Exception:
+                        uncontrolled_err += 1
                         print("Error encountered while loading <%s>"
-                              % os.path.join(root, afile))
-    print('** Loaded %s models, got controlled errors for %s files'
-          % (ok, err))
+                              % os.path.join(root, afile), file=sys.stderr)
+    print('** Loaded %s models, got controlled errors for %s files, %s uncontrolled'
+          % (ok, err, uncontrolled_err))
 
 
 if __name__ == '__main__':
