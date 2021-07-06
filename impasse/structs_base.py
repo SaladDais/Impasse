@@ -364,22 +364,25 @@ class MetadataEntryDataAccessor(SimpleAccessor):
 
 
 class MetadataMapping(Mapping[str, METADATA_VAL]):
-    __slots__ = ("metadata",)
+    __slots__ = ("_metadata",)
 
     def __init__(self, metadata: Metadata):
-        self.metadata = metadata
+        self._metadata = metadata
 
     def __len__(self) -> int:
-        return self.metadata.num_properties
+        return self._metadata.num_properties
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self.metadata.keys)
+        return iter(self._metadata.keys)
 
     def __getitem__(self, item: str) -> METADATA_VAL:
-        for i, k in enumerate(self.metadata.keys):
+        for i, k in enumerate(self._metadata.keys):
             if k == item:
-                return self.metadata.values[i].data
+                return self._metadata.values[i].data
         raise KeyError(repr(item))
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}<{dict(self)!r}>"
 
 
 # Materials-specific accessors and wrappers
@@ -412,30 +415,33 @@ class MaterialPropertyDataAccessor(SimpleAccessor):
 
 
 REAL_PROPERTY_KEY = Tuple[str, Union[TextureSemantic, int]]
-PROPERTY_KEY = Union[str, Tuple[str, REAL_PROPERTY_KEY]]
+PROPERTY_KEY = Union[str, REAL_PROPERTY_KEY]
 PROPERTY_VAL = Union[numpy.ndarray, str, bytes]
 
 
 class MaterialMapping(Mapping[PROPERTY_KEY, PROPERTY_VAL]):
-    __slots__ = ("material",)
+    __slots__ = ("_material",)
 
     def __init__(self, material: Material):
-        self.material = material
+        self._material = material
 
     def __len__(self) -> int:
-        return len(self.material.properties)
+        return len(self._material.properties)
 
     def __iter__(self) -> Iterator[REAL_PROPERTY_KEY]:
-        return iter(((p.key, p.semantic) for p in self.material.properties))
+        return iter(((p.key, p.semantic) for p in self._material.properties))
 
     def __getitem__(self, item: PROPERTY_KEY) -> PROPERTY_VAL:
         semantic = TextureSemantic.NONE
         if not isinstance(item, str):
             item, semantic = item
-        for prop in self.material.properties:
+        for prop in self._material.properties:
             if prop.semantic == semantic and prop.key == item:
                 return prop.data
         raise KeyError(repr((item, semantic)))
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}<{dict(self)!r}>"
 
 
 FUNCTION_DECLS = """

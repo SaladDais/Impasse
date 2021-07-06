@@ -8,3 +8,4 @@ exclude_lines =
     if typing.TYPE_CHECKING:
     def __repr__
     raise AssertionError
+    raise NotImplementedError

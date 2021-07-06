@@ -2,9 +2,11 @@ import os.path
 import unittest
 
 import impasse
+from impasse.constants import TextureSemantic
 
 # Find the root path of the test file so we can find the
 # test models above our directory
+
 HERE = os.path.abspath(os.path.dirname(__file__))
 MODELS_DIR = os.path.abspath(os.path.join(HERE, 'test_data'))
 TEST_SKINNED_MODEL = os.path.join(MODELS_DIR, 'glTF2', 'simple_skin', 'simple_skin.gltf')
@@ -31,6 +33,17 @@ class ImpasseTests(unittest.TestCase):
         finally:
             if scene:
                 impasse.release(scene)
+
+    def test_materials_mapping(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            material_map = scene.materials[0].as_mapping()
+            self.assertEqual(material_map["?mat.name"], "RedPlastic")
+            self.assertEqual(material_map["?mat.name", TextureSemantic.NONE], "RedPlastic")
+
+    def test_metadata_mapping(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            metadata = scene.metadata.as_mapping()
+            self.assertEqual(metadata['Created'], '2006-06-21T21:15:16Z')
 
 
 if __name__ == "__main__":
