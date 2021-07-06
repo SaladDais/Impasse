@@ -95,8 +95,9 @@ class Color4D(NumPyStruct):
     SHAPE = (4,)
     DTYPE = numpy.single
 
-    #  Red, green, blue and alpha color values
     r: float = SimpleAccessor()
+    """ Red, green, blue and alpha color values"""
+
     g: float = SimpleAccessor()
     b: float = SimpleAccessor()
     a: float = SimpleAccessor()
@@ -119,8 +120,9 @@ class Plane(NumPyStruct):
     SHAPE = (2,)
     DTYPE = numpy.single
 
-    #  Plane equation
     a: float = SimpleAccessor()
+    """ Plane equation"""
+
     b: float = SimpleAccessor()
     c: float = SimpleAccessor()
     d: float = SimpleAccessor()
@@ -142,8 +144,9 @@ class Color3D(NumPyStruct):
     SHAPE = (3,)
     DTYPE = numpy.single
 
-    #  Red, green and blue color values
     r: float = SimpleAccessor()
+    """ Red, green and blue color values"""
+
     g: float = SimpleAccessor()
     b: float = SimpleAccessor()
 
@@ -161,13 +164,15 @@ class String(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiString"
 
-    # Binary length of the string excluding the terminal 0. This is NOT the
-    #  logical length of strings containing UTF-8 multibyte sequences! It's
-    #  the number of bytes from the beginning of the string to its end.
     length: int = SimpleAccessor()
+    """
+    Binary length of the string excluding the terminal 0. This is NOT the
+     logical length of strings containing UTF-8 multibyte sequences! It's
+     the number of bytes from the beginning of the string to its end.
+    """
 
-    # String buffer. Size limit is MAXLEN
     data: Sequence[int] = StaticSequenceAccessor('data', 1024, None)
+    """String buffer. Size limit is MAXLEN"""
 
 
 C_SRC += """
@@ -186,13 +191,15 @@ class MaterialPropertyString(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMaterialPropertyString"
 
-    # Binary length of the string excluding the terminal 0. This is NOT the
-    #  logical length of strings containing UTF-8 multibyte sequences! It's
-    #  the number of bytes from the beginning of the string to its end.
     length: int = SimpleAccessor()
+    """
+    Binary length of the string excluding the terminal 0. This is NOT the
+     logical length of strings containing UTF-8 multibyte sequences! It's
+     the number of bytes from the beginning of the string to its end.
+    """
 
-    # String buffer. Size limit is MAXLEN
     data: Sequence[int] = StaticSequenceAccessor('data', 1024, None)
+    """String buffer. Size limit is MAXLEN"""
 
 
 C_SRC += """
@@ -214,29 +221,29 @@ class MemoryInfo(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMemoryInfo"
 
-    # Storage allocated for texture data
     textures: int = SimpleAccessor()
+    """Storage allocated for texture data"""
 
-    # Storage allocated for material data
     materials: int = SimpleAccessor()
+    """Storage allocated for material data"""
 
-    # Storage allocated for mesh data
     meshes: int = SimpleAccessor()
+    """Storage allocated for mesh data"""
 
-    # Storage allocated for node data
     nodes: int = SimpleAccessor()
+    """Storage allocated for node data"""
 
-    # Storage allocated for animation data
     animations: int = SimpleAccessor()
+    """Storage allocated for animation data"""
 
-    # Storage allocated for camera data
     cameras: int = SimpleAccessor()
+    """Storage allocated for camera data"""
 
-    # Storage allocated for light data
     lights: int = SimpleAccessor()
+    """Storage allocated for light data"""
 
-    # Total storage allocated for the full import.
     total: int = SimpleAccessor()
+    """Total storage allocated for the full import."""
 
 
 C_SRC += """
@@ -256,8 +263,9 @@ class Quaternion(NumPyStruct):
     SHAPE = (4,)
     DTYPE = numpy.single
 
-    #  w,x,y,z components of the quaternion
     w: float = SimpleAccessor()
+    """ w,x,y,z components of the quaternion"""
+
     x: float = SimpleAccessor()
     y: float = SimpleAccessor()
     z: float = SimpleAccessor()
@@ -276,13 +284,15 @@ class Face(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiFace"
 
-    #  Number of indices defining this face.
-    #  The maximum value for this member is
-    # AI_MAX_FACE_INDICES.
     num_indices: int = SimpleAccessor(name='mNumIndices')
+    """
+     Number of indices defining this face.
+     The maximum value for this member is
+    AI_MAX_FACE_INDICES.
+    """
 
-    #  Pointer to the indices array. Size of the array is given in numIndices.
     indices: Sequence[int] = DynamicSequenceAccessor('mIndices', 'mNumIndices', None)
+    """ Pointer to the indices array. Size of the array is given in numIndices."""
 
 
 C_SRC += """
@@ -298,12 +308,14 @@ class VertexWeight(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiVertexWeight"
 
-    #  Index of the vertex which is influenced by the bone.
     vertex_id: int = SimpleAccessor(name='mVertexId')
+    """ Index of the vertex which is influenced by the bone."""
 
-    #  The strength of the influence in the range (0...1).
-    #  The influence from all bones at one vertex amounts to 1.
     weight: float = SimpleAccessor(name='mWeight')
+    """
+     The strength of the influence in the range (0...1).
+     The influence from all bones at one vertex amounts to 1.
+    """
 
 
 C_SRC += """
@@ -387,16 +399,18 @@ class MeshKey(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMeshKey"
 
-    # The time of this key
     time: float = SimpleAccessor(name='mTime')
+    """The time of this key"""
 
-    # Index into the aiMesh::mAnimMeshes array of the
-    #  mesh corresponding to the
-    # aiMeshAnim hosting this
-    #  key frame. The referenced anim mesh is evaluated
-    #  according to the rules defined in the docs for
-    # aiAnimMesh.
     value: int = SimpleAccessor(name='mValue')
+    """
+    Index into the aiMesh::mAnimMeshes array of the
+     mesh corresponding to the
+    aiMeshAnim hosting this
+     key frame. The referenced anim mesh is evaluated
+     according to the rules defined in the docs for
+    aiAnimMesh.
+    """
 
 
 C_SRC += """
@@ -412,8 +426,9 @@ class MetadataEntry(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMetadataEntry"
 
-    # The type field uniquely identifies the underlying type of the data field
     type: int = SimpleAccessor(name='mType')
+    """The type field uniquely identifies the underlying type of the data field"""
+
     data: Any = MetadataEntryDataAccessor()
 
 
@@ -431,16 +446,20 @@ class Metadata(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMetadata"
 
-    # Length of the mKeys and mValues arrays, respectively
     num_properties: int = SimpleAccessor(name='mNumProperties')
+    """Length of the mKeys and mValues arrays, respectively"""
 
-    # Arrays of keys, may not be NULL. Entries in this array may not be NULL
-    # as well.
     keys: Sequence[str] = DynamicSequenceAccessor('mKeys', 'mNumProperties', StringAdapter)
+    """
+    Arrays of keys, may not be NULL. Entries in this array may not be NULL
+    as well.
+    """
 
-    # Arrays of values, may not be NULL. Entries in this array may be NULL
-    # if the corresponding property key has no assigned value.
     values: Sequence[MetadataEntry] = DynamicSequenceAccessor('mValues', 'mNumProperties', MetadataEntry)
+    """
+    Arrays of values, may not be NULL. Entries in this array may be NULL
+    if the corresponding property key has no assigned value.
+    """
 
     def as_mapping(self) -> MetadataMapping:
         return MetadataMapping(self)
@@ -465,42 +484,46 @@ class Node(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiNode"
 
-    # The name of the node.
-    # The name might be empty (length of zero) but all nodes which
-    # need to be accessed afterwards by bones or anims are usually named.
-    # Multiple nodes may have the same name, but nodes which are accessed
-    # by bones (see
-    # aiBone and
-    # aiMesh::mBones) *must* be unique.
-    # Cameras and lights are assigned to a specific node name - if there
-    # are multiple nodes with this name, they're assigned to each of them.
-    # <br>
-    # There are no limitations regarding the characters contained in
-    # this text. You should be able to handle stuff like whitespace, tabs,
-    # linefeeds, quotation marks, ampersands, ... .
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """
+    The name of the node.
+    The name might be empty (length of zero) but all nodes which
+    need to be accessed afterwards by bones or anims are usually named.
+    Multiple nodes may have the same name, but nodes which are accessed
+    by bones (see
+    aiBone and
+    aiMesh::mBones) *must* be unique.
+    Cameras and lights are assigned to a specific node name - if there
+    are multiple nodes with this name, they're assigned to each of them.
+    <br>
+    There are no limitations regarding the characters contained in
+    this text. You should be able to handle stuff like whitespace, tabs,
+    linefeeds, quotation marks, ampersands, ... .
+    """
 
-    # The transformation relative to the node's parent.
     transformation: numpy.ndarray = SimpleAccessor(name='mTransformation', adapter=Matrix4x4)
+    """The transformation relative to the node's parent."""
 
-    # Parent node. NULL if this node is the root node.
     parent: Optional['Node'] = SimpleAccessor(name='mParent', adapter=LazyStruct(lambda: Node))
+    """Parent node. NULL if this node is the root node."""
 
-    # The number of child nodes of this node.
     num_children: int = SimpleAccessor(name='mNumChildren')
+    """The number of child nodes of this node."""
 
-    # The child nodes of this node. NULL if mNumChildren is 0.
     children: Sequence['Node'] = DynamicSequenceAccessor('mChildren', 'mNumChildren', LazyStruct(lambda: Node))
+    """The child nodes of this node. NULL if mNumChildren is 0."""
 
-    # The number of meshes of this node.
     num_meshes: int = SimpleAccessor(name='mNumMeshes')
+    """The number of meshes of this node."""
 
-    # The meshes of this node. Each entry is an index into the mesh
     meshes: Sequence[int] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', None)
+    """The meshes of this node. Each entry is an index into the mesh"""
 
-    # Metadata associated with this node or NULL if there is no metadata.
-    # Whether any metadata is generated depends on the source file format.
     metadata: Optional[Metadata] = SimpleAccessor(name='mMetadata', adapter=Metadata)
+    """
+    Metadata associated with this node or NULL if there is no metadata.
+    Whether any metadata is generated depends on the source file format.
+    """
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -531,108 +554,134 @@ class Light(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiLight"
 
-    # The name of the light source.
-    #  There must be a node in the scenegraph with the same name.
-    #  This node specifies the position of the light in the scene
-    #  hierarchy and can be animated.
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """
+    The name of the light source.
+     There must be a node in the scenegraph with the same name.
+     This node specifies the position of the light in the scene
+     hierarchy and can be animated.
+    """
 
-    # The type of the light source.
-    # aiLightSource_UNDEFINED is not a valid value for this member.
     type: int = SimpleAccessor(name='mType')
+    """
+    The type of the light source.
+    aiLightSource_UNDEFINED is not a valid value for this member.
+    """
 
-    # Position of the light source in space. Relative to the
-    #  transformation of the node corresponding to the light.
-    #  The position is undefined for directional lights.
     position: numpy.ndarray = SimpleAccessor(name='mPosition', adapter=Vector3D)
+    """
+    Position of the light source in space. Relative to the
+     transformation of the node corresponding to the light.
+     The position is undefined for directional lights.
+    """
 
-    # Direction of the light source in space. Relative to the
-    #  transformation of the node corresponding to the light.
-    #  The direction is undefined for point lights. The vector
-    #  may be normalized, but it needn't.
     direction: numpy.ndarray = SimpleAccessor(name='mDirection', adapter=Vector3D)
+    """
+    Direction of the light source in space. Relative to the
+     transformation of the node corresponding to the light.
+     The direction is undefined for point lights. The vector
+     may be normalized, but it needn't.
+    """
 
-    # Up direction of the light source in space. Relative to the
-    #  transformation of the node corresponding to the light.
-    #
-    # The direction is undefined for point lights. The vector
-    #  may be normalized, but it needn't.
     up: numpy.ndarray = SimpleAccessor(name='mUp', adapter=Vector3D)
+    """
+    Up direction of the light source in space. Relative to the
+     transformation of the node corresponding to the light.
 
-    # Constant light attenuation factor.
-    #  The intensity of the light source at a given distance 'd' from
-    #  the light's position is
-    #  @code
-    #  Atten = 1/( att0 + att1
-    # d + att2
-    # d*d)
-    #  @endcode
-    #  This member corresponds to the att0 variable in the equation.
-    #  Naturally undefined for directional lights.
+    The direction is undefined for point lights. The vector
+     may be normalized, but it needn't.
+    """
+
     attenuation_constant: float = SimpleAccessor(name='mAttenuationConstant')
+    """
+    Constant light attenuation factor.
+     The intensity of the light source at a given distance 'd' from
+     the light's position is
+     @code
+     Atten = 1/( att0 + att1
+    d + att2
+    d*d)
+     @endcode
+     This member corresponds to the att0 variable in the equation.
+     Naturally undefined for directional lights.
+    """
 
-    # Linear light attenuation factor.
-    #  The intensity of the light source at a given distance 'd' from
-    #  the light's position is
-    #  @code
-    #  Atten = 1/( att0 + att1
-    # d + att2
-    # d*d)
-    #  @endcode
-    #  This member corresponds to the att1 variable in the equation.
-    #  Naturally undefined for directional lights.
     attenuation_linear: float = SimpleAccessor(name='mAttenuationLinear')
+    """
+    Linear light attenuation factor.
+     The intensity of the light source at a given distance 'd' from
+     the light's position is
+     @code
+     Atten = 1/( att0 + att1
+    d + att2
+    d*d)
+     @endcode
+     This member corresponds to the att1 variable in the equation.
+     Naturally undefined for directional lights.
+    """
 
-    # Quadratic light attenuation factor.
-    #  The intensity of the light source at a given distance 'd' from
-    #  the light's position is
-    #  @code
-    #  Atten = 1/( att0 + att1
-    # d + att2
-    # d*d)
-    #  @endcode
-    #  This member corresponds to the att2 variable in the equation.
-    #  Naturally undefined for directional lights.
     attenuation_quadratic: float = SimpleAccessor(name='mAttenuationQuadratic')
+    """
+    Quadratic light attenuation factor.
+     The intensity of the light source at a given distance 'd' from
+     the light's position is
+     @code
+     Atten = 1/( att0 + att1
+    d + att2
+    d*d)
+     @endcode
+     This member corresponds to the att2 variable in the equation.
+     Naturally undefined for directional lights.
+    """
 
-    # Diffuse color of the light source
-    #  The diffuse light color is multiplied with the diffuse
-    #  material color to obtain the final color that contributes
-    #  to the diffuse shading term.
     color_diffuse: numpy.ndarray = SimpleAccessor(name='mColorDiffuse', adapter=Color3D)
+    """
+    Diffuse color of the light source
+     The diffuse light color is multiplied with the diffuse
+     material color to obtain the final color that contributes
+     to the diffuse shading term.
+    """
 
-    # Specular color of the light source
-    #  The specular light color is multiplied with the specular
-    #  material color to obtain the final color that contributes
-    #  to the specular shading term.
     color_specular: numpy.ndarray = SimpleAccessor(name='mColorSpecular', adapter=Color3D)
+    """
+    Specular color of the light source
+     The specular light color is multiplied with the specular
+     material color to obtain the final color that contributes
+     to the specular shading term.
+    """
 
-    # Ambient color of the light source
-    #  The ambient light color is multiplied with the ambient
-    #  material color to obtain the final color that contributes
-    #  to the ambient shading term. Most renderers will ignore
-    #  this value it, is just a remaining of the fixed-function pipeline
-    #  that is still supported by quite many file formats.
     color_ambient: numpy.ndarray = SimpleAccessor(name='mColorAmbient', adapter=Color3D)
+    """
+    Ambient color of the light source
+     The ambient light color is multiplied with the ambient
+     material color to obtain the final color that contributes
+     to the ambient shading term. Most renderers will ignore
+     this value it, is just a remaining of the fixed-function pipeline
+     that is still supported by quite many file formats.
+    """
 
-    # Inner angle of a spot light's light cone.
-    #  The spot light has maximum influence on objects inside this
-    #  angle. The angle is given in radians. It is 2PI for point
-    #  lights and undefined for directional lights.
     angle_inner_cone: float = SimpleAccessor(name='mAngleInnerCone')
+    """
+    Inner angle of a spot light's light cone.
+     The spot light has maximum influence on objects inside this
+     angle. The angle is given in radians. It is 2PI for point
+     lights and undefined for directional lights.
+    """
 
-    # Outer angle of a spot light's light cone.
-    #  The spot light does not affect objects outside this angle.
-    #  The angle is given in radians. It is 2PI for point lights and
-    #  undefined for directional lights. The outer angle must be
-    #  greater than or equal to the inner angle.
-    #  It is assumed that the application uses a smooth
-    #  interpolation between the inner and the outer cone of the
-    #  spot light.
     angle_outer_cone: float = SimpleAccessor(name='mAngleOuterCone')
+    """
+    Outer angle of a spot light's light cone.
+     The spot light does not affect objects outside this angle.
+     The angle is given in radians. It is 2PI for point lights and
+     undefined for directional lights. The outer angle must be
+     greater than or equal to the inner angle.
+     It is assumed that the application uses a smooth
+     interpolation between the inner and the outer cone of the
+     spot light.
+    """
 
-    # Size of area light source.
     size: numpy.ndarray = SimpleAccessor(name='mSize', adapter=Vector2D)
+    """Size of area light source."""
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -654,51 +703,61 @@ class Texture(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiTexture"
 
-    # Width of the texture, in pixels
-    # If mHeight is zero the texture is compressed in a format
-    # like JPEG. In this case mWidth specifies the size of the
-    # memory area pcData is pointing to, in bytes.
     width: int = SimpleAccessor(name='mWidth')
+    """
+    Width of the texture, in pixels
+    If mHeight is zero the texture is compressed in a format
+    like JPEG. In this case mWidth specifies the size of the
+    memory area pcData is pointing to, in bytes.
+    """
 
-    # Height of the texture, in pixels
-    # If this value is zero, pcData points to an compressed texture
-    # in any format (e.g. JPEG).
     height: int = SimpleAccessor(name='mHeight')
+    """
+    Height of the texture, in pixels
+    If this value is zero, pcData points to an compressed texture
+    in any format (e.g. JPEG).
+    """
 
-    # A hint from the loader to make it easier for applications
-    # to determine the type of embedded textures.
-    #
-    # If mHeight != 0 this member is show how data is packed. Hint will consist of
-    # two parts: channel order and channel bitness (count of the bits for every
-    # color channel). For simple parsing by the viewer it's better to not omit
-    # absent color channel and just use 0 for bitness. For example:
-    # 1. Image contain RGBA and 8 bit per channel, achFormatHint == "rgba8888";
-    # 2. Image contain ARGB and 8 bit per channel, achFormatHint == "argb8888";
-    # 3. Image contain RGB and 5 bit for R and B channels and 6 bit for G channel,
-    #    achFormatHint == "rgba5650";
-    # 4. One color image with B channel and 1 bit for it, achFormatHint == "rgba0010";
-    # If mHeight == 0 then achFormatHint is set set to '\\0\\0\\0\\0' if the loader has no additional
-    # information about the texture file format used OR the
-    # file extension of the format without a trailing dot. If there
-    # are multiple file extensions for a format, the shortest
-    # extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
-    # E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
-    # The fourth character will always be '\\0'.
     ach_format_hint: str = SimpleAccessor(name='achFormatHint', adapter=CStrAdapter(9))
+    """
+    A hint from the loader to make it easier for applications
+    to determine the type of embedded textures.
 
-    # Data of the texture.
-    # Points to an array of mWidth
-    # mHeight aiTexel's.
-    # The format of the texture data is always ARGB8888 to
-    # make the implementation for user of the library as easy
-    # as possible. If mHeight = 0 this is a pointer to a memory
-    # buffer of size mWidth containing the compressed texture
-    # data. Good luck, have fun!
+    If mHeight != 0 this member is show how data is packed. Hint will consist of
+    two parts: channel order and channel bitness (count of the bits for every
+    color channel). For simple parsing by the viewer it's better to not omit
+    absent color channel and just use 0 for bitness. For example:
+    1. Image contain RGBA and 8 bit per channel, achFormatHint == "rgba8888";
+    2. Image contain ARGB and 8 bit per channel, achFormatHint == "argb8888";
+    3. Image contain RGB and 5 bit for R and B channels and 6 bit for G channel,
+       achFormatHint == "rgba5650";
+    4. One color image with B channel and 1 bit for it, achFormatHint == "rgba0010";
+    If mHeight == 0 then achFormatHint is set set to '\\0\\0\\0\\0' if the loader has no additional
+    information about the texture file format used OR the
+    file extension of the format without a trailing dot. If there
+    are multiple file extensions for a format, the shortest
+    extension is chosen (JPEG maps to 'jpg', not to 'jpeg').
+    E.g. 'dds\\0', 'pcx\\0', 'jpg\\0'.  All characters are lower-case.
+    The fourth character will always be '\\0'.
+    """
+
     data: Union[bytearray, numpy.ndarray] = TextureDataAccessor()
+    """
+    Data of the texture.
+    Points to an array of mWidth
+    mHeight aiTexel's.
+    The format of the texture data is always ARGB8888 to
+    make the implementation for user of the library as easy
+    as possible. If mHeight = 0 this is a pointer to a memory
+    buffer of size mWidth containing the compressed texture
+    data. Good luck, have fun!
+    """
 
-    # Texture original filename
-    # Used to get the texture reference
     filename: str = SimpleAccessor(name='mFilename', adapter=StringAdapter)
+    """
+    Texture original filename
+    Used to get the texture reference
+    """
 
 
 C_SRC += """
@@ -714,8 +773,9 @@ class Ray(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiRay"
 
-    #  Position and direction of the ray
     pos: numpy.ndarray = SimpleAccessor(adapter=Vector3D)
+    """ Position and direction of the ray"""
+
     dir: numpy.ndarray = SimpleAccessor(adapter=Vector3D)
 
 
@@ -733,19 +793,25 @@ class UVTransform(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiUVTransform"
 
-    # Translation on the u and v axes.
-    #  The default value is (0|0).
     translation: numpy.ndarray = SimpleAccessor(name='mTranslation', adapter=Vector2D)
+    """
+    Translation on the u and v axes.
+     The default value is (0|0).
+    """
 
-    # Scaling on the u and v axes.
-    #  The default value is (1|1).
     scaling: numpy.ndarray = SimpleAccessor(name='mScaling', adapter=Vector2D)
+    """
+    Scaling on the u and v axes.
+     The default value is (1|1).
+    """
 
-    # Rotation - in counter-clockwise direction.
-    #  The rotation angle is specified in radians. The
-    #  rotation center is 0.5f|0.5f. The default value
-    #  0.f.
     rotation: float = SimpleAccessor(name='mRotation')
+    """
+    Rotation - in counter-clockwise direction.
+     The rotation angle is specified in radians. The
+     rotation center is 0.5f|0.5f. The default value
+     0.f.
+    """
 
 
 C_SRC += """
@@ -765,34 +831,46 @@ class MaterialProperty(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMaterialProperty"
 
-    # Specifies the name of the property (key)
-    #  Keys are generally case insensitive.
     key: str = SimpleAccessor(name='mKey', adapter=StringAdapter)
+    """
+    Specifies the name of the property (key)
+     Keys are generally case insensitive.
+    """
 
-    # Textures: Specifies their exact usage semantic.
-    # For non-texture properties, this member is always 0
-    # (or, better-said,
-    # aiTextureType_NONE).
     semantic: int = SimpleAccessor(name='mSemantic')
+    """
+    Textures: Specifies their exact usage semantic.
+    For non-texture properties, this member is always 0
+    (or, better-said,
+    aiTextureType_NONE).
+    """
 
-    # Textures: Specifies the index of the texture.
-    #  For non-texture properties, this member is always 0.
     index: int = SimpleAccessor(name='mIndex')
+    """
+    Textures: Specifies the index of the texture.
+     For non-texture properties, this member is always 0.
+    """
 
-    # Size of the buffer mData is pointing to, in bytes.
-    #  This value may not be 0.
     data_length: int = SimpleAccessor(name='mDataLength')
+    """
+    Size of the buffer mData is pointing to, in bytes.
+     This value may not be 0.
+    """
 
-    # Type information for the property.
-    # Defines the data layout inside the data buffer. This is used
-    # by the library internally to perform debug checks and to
-    # utilize proper type conversions.
-    # (It's probably a hacky solution, but it works.)
     type: int = SimpleAccessor(name='mType')
+    """
+    Type information for the property.
+    Defines the data layout inside the data buffer. This is used
+    by the library internally to perform debug checks and to
+    utilize proper type conversions.
+    (It's probably a hacky solution, but it works.)
+    """
 
-    # Binary buffer to hold the property's value.
-    # The size of the buffer is always mDataLength.
     data: Any = MaterialPropertyDataAccessor()
+    """
+    Binary buffer to hold the property's value.
+    The size of the buffer is always mDataLength.
+    """
 
 
 C_SRC += """
@@ -809,14 +887,14 @@ class Material(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMaterial"
 
-    # List of all material properties loaded.
     properties: Sequence[MaterialProperty] = DynamicSequenceAccessor('mProperties', 'mNumProperties', MaterialProperty)
+    """List of all material properties loaded."""
 
-    # Number of properties in the data base
     num_properties: int = SimpleAccessor(name='mNumProperties')
+    """Number of properties in the data base"""
 
-    # Storage allocated
     num_allocated: int = SimpleAccessor(name='mNumAllocated')
+    """Storage allocated"""
 
     def as_mapping(self) -> MaterialMapping:
         return MaterialMapping(self)
@@ -837,19 +915,21 @@ class Bone(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiBone"
 
-    #  The name of the bone.
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """ The name of the bone."""
 
-    #  The number of vertices affected by this bone
-    #  The maximum value for this member is
-    # AI_MAX_BONE_WEIGHTS.
     num_weights: int = SimpleAccessor(name='mNumWeights')
+    """
+     The number of vertices affected by this bone
+     The maximum value for this member is
+    AI_MAX_BONE_WEIGHTS.
+    """
 
-    #  The vertices affected by this bone
     weights: Sequence[VertexWeight] = DynamicSequenceAccessor('mWeights', 'mNumWeights', VertexWeight)
+    """ The vertices affected by this bone"""
 
-    #  Matrix that transforms from mesh space to bone space in bind pose
     offset_matrix: numpy.ndarray = SimpleAccessor(name='mOffsetMatrix', adapter=Matrix4x4)
+    """ Matrix that transforms from mesh space to bone space in bind pose"""
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -875,43 +955,47 @@ class AnimMesh(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiAnimMesh"
 
-    #  Anim Mesh name
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """ Anim Mesh name"""
 
-    # Replacement for aiMesh::mVertices. If this array is non-NULL,
-    # it *must* contain mNumVertices entries. The corresponding
-    # array in the host mesh must be non-NULL as well - animation
-    # meshes may neither add or nor remove vertex components (if
-    # a replacement array is NULL and the corresponding source
-    # array is not, the source data is taken instead)
     vertices: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mVertices', 'mNumVertices', Vector3D)
+    """
+    Replacement for aiMesh::mVertices. If this array is non-NULL,
+    it *must* contain mNumVertices entries. The corresponding
+    array in the host mesh must be non-NULL as well - animation
+    meshes may neither add or nor remove vertex components (if
+    a replacement array is NULL and the corresponding source
+    array is not, the source data is taken instead)
+    """
 
-    # Replacement for aiMesh::mNormals.
     normals: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mNormals', 'mNumVertices', Vector3D)
+    """Replacement for aiMesh::mNormals."""
 
-    # Replacement for aiMesh::mTangents.
     tangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mTangents', 'mNumVertices', Vector3D)
+    """Replacement for aiMesh::mTangents."""
 
-    # Replacement for aiMesh::mBitangents.
     bitangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mBitangents', 'mNumVertices', Vector3D)
+    """Replacement for aiMesh::mBitangents."""
 
-    # Replacement for aiMesh::mColors
     colors: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mColors', 8, Color4D)
+    """Replacement for aiMesh::mColors"""
 
-    # Replacement for aiMesh::mTextureCoords
     texture_coords: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mTextureCoords', 8, Vector3D)
+    """Replacement for aiMesh::mTextureCoords"""
 
-    # The number of vertices in the aiAnimMesh, and thus the length of all
-    # the member arrays.
-    #
-    # This has always the same value as the mNumVertices property in the
-    # corresponding aiMesh. It is duplicated here merely to make the length
-    # of the member arrays accessible even if the aiMesh is not known, e.g.
-    # from language bindings.
     num_vertices: int = SimpleAccessor(name='mNumVertices')
+    """
+    The number of vertices in the aiAnimMesh, and thus the length of all
+    the member arrays.
 
-    # Weight of the AnimMesh.
+    This has always the same value as the mNumVertices property in the
+    corresponding aiMesh. It is duplicated here merely to make the length
+    of the member arrays accessible even if the aiMesh is not known, e.g.
+    from language bindings.
+    """
+
     weight: float = SimpleAccessor(name='mWeight')
+    """Weight of the AnimMesh."""
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -946,139 +1030,171 @@ class Mesh(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMesh"
 
-    # aiPrimitiveType enum.
-    # This specifies which types of primitives are present in the mesh.
-    # The "SortByPrimitiveType"-Step can be used to make sure the
-    # output meshes consist of one primitive type each.
     primitive_types: int = SimpleAccessor(name='mPrimitiveTypes')
+    """
+    aiPrimitiveType enum.
+    This specifies which types of primitives are present in the mesh.
+    The "SortByPrimitiveType"-Step can be used to make sure the
+    output meshes consist of one primitive type each.
+    """
 
-    # The number of vertices in this mesh.
-    # This is also the size of all of the per-vertex data arrays.
-    # The maximum value for this member is
-    # AI_MAX_VERTICES.
     num_vertices: int = SimpleAccessor(name='mNumVertices')
+    """
+    The number of vertices in this mesh.
+    This is also the size of all of the per-vertex data arrays.
+    The maximum value for this member is
+    AI_MAX_VERTICES.
+    """
 
-    # The number of primitives (triangles, polygons, lines) in this  mesh.
-    # This is also the size of the mFaces array.
-    # The maximum value for this member is
-    # AI_MAX_FACES.
     num_faces: int = SimpleAccessor(name='mNumFaces')
+    """
+    The number of primitives (triangles, polygons, lines) in this  mesh.
+    This is also the size of the mFaces array.
+    The maximum value for this member is
+    AI_MAX_FACES.
+    """
 
-    # Vertex positions.
-    # This array is always present in a mesh. The array is
-    # mNumVertices in size.
     vertices: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mVertices', 'mNumVertices', Vector3D)
+    """
+    Vertex positions.
+    This array is always present in a mesh. The array is
+    mNumVertices in size.
+    """
 
-    # Vertex normals.
-    # The array contains normalized vectors, NULL if not present.
-    # The array is mNumVertices in size. Normals are undefined for
-    # point and line primitives. A mesh consisting of points and
-    # lines only may not have normal vectors. Meshes with mixed
-    # primitive types (i.e. lines and triangles) may have normals,
-    # but the normals for vertices that are only referenced by
-    # point or line primitives are undefined and set to QNaN (WARN:
-    # qNaN compares to inequal to *everything*, even to qNaN itself.
-    # Using code like this to check whether a field is qnan is:
-    # @code
-    # define IS_QNAN(f) (f != f)
-    # @endcode
-    # still dangerous because even 1.f == 1.f could evaluate to false! (
-    # remember the subtleties of IEEE754 artithmetics). Use stuff like
-    # @c fpclassify instead.
-    # @note Normal vectors computed by Assimp are always unit-length.
-    # However, this needn't apply for normals that have been taken
-    #   directly from the model file.
     normals: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mNormals', 'mNumVertices', Vector3D)
+    """
+    Vertex normals.
+    The array contains normalized vectors, NULL if not present.
+    The array is mNumVertices in size. Normals are undefined for
+    point and line primitives. A mesh consisting of points and
+    lines only may not have normal vectors. Meshes with mixed
+    primitive types (i.e. lines and triangles) may have normals,
+    but the normals for vertices that are only referenced by
+    point or line primitives are undefined and set to QNaN (WARN:
+    qNaN compares to inequal to *everything*, even to qNaN itself.
+    Using code like this to check whether a field is qnan is:
+    @code
+    define IS_QNAN(f) (f != f)
+    @endcode
+    still dangerous because even 1.f == 1.f could evaluate to false! (
+    remember the subtleties of IEEE754 artithmetics). Use stuff like
+    @c fpclassify instead.
+    @note Normal vectors computed by Assimp are always unit-length.
+    However, this needn't apply for normals that have been taken
+      directly from the model file.
+    """
 
-    # Vertex tangents.
-    # The tangent of a vertex points in the direction of the positive
-    # X texture axis. The array contains normalized vectors, NULL if
-    # not present. The array is mNumVertices in size. A mesh consisting
-    # of points and lines only may not have normal vectors. Meshes with
-    # mixed primitive types (i.e. lines and triangles) may have
-    # normals, but the normals for vertices that are only referenced by
-    # point or line primitives are undefined and set to qNaN.  See
-    # the
-    # mNormals member for a detailed discussion of qNaNs.
-    # @note If the mesh contains tangents, it automatically also
-    # contains bitangents (the bitangent is just the cross product of
-    # tangent and normal vectors).
     tangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mTangents', 'mNumVertices', Vector3D)
+    """
+    Vertex tangents.
+    The tangent of a vertex points in the direction of the positive
+    X texture axis. The array contains normalized vectors, NULL if
+    not present. The array is mNumVertices in size. A mesh consisting
+    of points and lines only may not have normal vectors. Meshes with
+    mixed primitive types (i.e. lines and triangles) may have
+    normals, but the normals for vertices that are only referenced by
+    point or line primitives are undefined and set to qNaN.  See
+    the
+    mNormals member for a detailed discussion of qNaNs.
+    @note If the mesh contains tangents, it automatically also
+    contains bitangents (the bitangent is just the cross product of
+    tangent and normal vectors).
+    """
 
-    # Vertex bitangents.
-    # The bitangent of a vertex points in the direction of the positive
-    # Y texture axis. The array contains normalized vectors, NULL if not
-    # present. The array is mNumVertices in size.
-    # @note If the mesh contains tangents, it automatically also contains
-    # bitangents.
     bitangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mBitangents', 'mNumVertices', Vector3D)
+    """
+    Vertex bitangents.
+    The bitangent of a vertex points in the direction of the positive
+    Y texture axis. The array contains normalized vectors, NULL if not
+    present. The array is mNumVertices in size.
+    @note If the mesh contains tangents, it automatically also contains
+    bitangents.
+    """
 
-    # Vertex color sets.
-    # A mesh may contain 0 to
-    # AI_MAX_NUMBER_OF_COLOR_SETS vertex
-    # colors per vertex. NULL if not present. Each array is
-    # mNumVertices in size if present.
     colors: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mColors', 8, Color4D)
+    """
+    Vertex color sets.
+    A mesh may contain 0 to
+    AI_MAX_NUMBER_OF_COLOR_SETS vertex
+    colors per vertex. NULL if not present. Each array is
+    mNumVertices in size if present.
+    """
 
-    # Vertex texture coords, also known as UV channels.
-    # A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
-    # vertex. NULL if not present. The array is mNumVertices in size.
     texture_coords: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mTextureCoords', 8, Vector3D)
+    """
+    Vertex texture coords, also known as UV channels.
+    A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
+    vertex. NULL if not present. The array is mNumVertices in size.
+    """
 
-    # Specifies the number of components for a given UV channel.
-    # Up to three channels are supported (UVW, for accessing volume
-    # or cube maps). If the value is 2 for a given channel n, the
-    # component p.z of mTextureCoords[n][p] is set to 0.0f.
-    # If the value is 1 for a given channel, p.y is set to 0.0f, too.
-    # @note 4D coords are not supported
     num_uv_components: Sequence[int] = StaticSequenceAccessor('mNumUVComponents', 8, None)
+    """
+    Specifies the number of components for a given UV channel.
+    Up to three channels are supported (UVW, for accessing volume
+    or cube maps). If the value is 2 for a given channel n, the
+    component p.z of mTextureCoords[n][p] is set to 0.0f.
+    If the value is 1 for a given channel, p.y is set to 0.0f, too.
+    @note 4D coords are not supported
+    """
 
-    # The faces the mesh is constructed from.
-    # Each face refers to a number of vertices by their indices.
-    # This array is always present in a mesh, its size is given
-    # in mNumFaces. If the
-    # AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
-    # is NOT set each face references an unique set of vertices.
     faces: Sequence[Face] = DynamicSequenceAccessor('mFaces', 'mNumFaces', Face)
+    """
+    The faces the mesh is constructed from.
+    Each face refers to a number of vertices by their indices.
+    This array is always present in a mesh, its size is given
+    in mNumFaces. If the
+    AI_SCENE_FLAGS_NON_VERBOSE_FORMAT
+    is NOT set each face references an unique set of vertices.
+    """
 
-    # The number of bones this mesh contains.
-    # Can be 0, in which case the mBones array is NULL.
     num_bones: int = SimpleAccessor(name='mNumBones')
+    """
+    The number of bones this mesh contains.
+    Can be 0, in which case the mBones array is NULL.
+    """
 
-    # The bones of this mesh.
-    # A bone consists of a name by which it can be found in the
-    # frame hierarchy and a set of vertex weights.
     bones: Sequence[Bone] = DynamicSequenceAccessor('mBones', 'mNumBones', Bone)
+    """
+    The bones of this mesh.
+    A bone consists of a name by which it can be found in the
+    frame hierarchy and a set of vertex weights.
+    """
 
-    # The material used by this mesh.
-    # A mesh does use only a single material. If an imported model uses
-    # multiple materials, the import splits up the mesh. Use this value
-    # as index into the scene's material list.
     material_index: int = SimpleAccessor(name='mMaterialIndex')
+    """
+    The material used by this mesh.
+    A mesh does use only a single material. If an imported model uses
+    multiple materials, the import splits up the mesh. Use this value
+    as index into the scene's material list.
+    """
 
-    # Name of the mesh. Meshes can be named, but this is not a
-    #  requirement and leaving this field empty is totally fine.
-    #  There are mainly three uses for mesh names:
-    #   - some formats name nodes and meshes independently.
-    #   - importers tend to split meshes up to meet the
-    #      one-material-per-mesh requirement. Assigning
-    #      the same (dummy) name to each of the result meshes
-    #      aids the caller at recovering the original mesh
-    #      partitioning.
-    #   - Vertex animations refer to meshes by their names.
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """
+    Name of the mesh. Meshes can be named, but this is not a
+     requirement and leaving this field empty is totally fine.
+     There are mainly three uses for mesh names:
+      - some formats name nodes and meshes independently.
+      - importers tend to split meshes up to meet the
+         one-material-per-mesh requirement. Assigning
+         the same (dummy) name to each of the result meshes
+         aids the caller at recovering the original mesh
+         partitioning.
+      - Vertex animations refer to meshes by their names.
+    """
 
-    # The number of attachment meshes. Note! Currently only works with Collada loader.
     num_anim_meshes: int = SimpleAccessor(name='mNumAnimMeshes')
+    """The number of attachment meshes. Note! Currently only works with Collada loader."""
 
-    # Attachment meshes for this mesh, for vertex-based animation.
-    # Attachment meshes carry replacement data for some of the
-    # mesh'es vertex components (usually positions, normals).
-    # Note! Currently only works with Collada loader.
     anim_meshes: Sequence[AnimMesh] = DynamicSequenceAccessor('mAnimMeshes', 'mNumAnimMeshes', AnimMesh)
+    """
+    Attachment meshes for this mesh, for vertex-based animation.
+    Attachment meshes carry replacement data for some of the
+    mesh'es vertex components (usually positions, normals).
+    Note! Currently only works with Collada loader.
+    """
 
-    # Method of morphing when animeshes are specified.
     method: int = SimpleAccessor(name='mMethod')
+    """Method of morphing when animeshes are specified."""
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -1103,57 +1219,73 @@ class Camera(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiCamera"
 
-    # The name of the camera.
-    #  There must be a node in the scenegraph with the same name.
-    #  This node specifies the position of the camera in the scene
-    #  hierarchy and can be animated.
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """
+    The name of the camera.
+     There must be a node in the scenegraph with the same name.
+     This node specifies the position of the camera in the scene
+     hierarchy and can be animated.
+    """
 
-    # Position of the camera relative to the coordinate space
-    #  defined by the corresponding node.
-    #  The default value is 0|0|0.
     position: numpy.ndarray = SimpleAccessor(name='mPosition', adapter=Vector3D)
+    """
+    Position of the camera relative to the coordinate space
+     defined by the corresponding node.
+     The default value is 0|0|0.
+    """
 
-    # 'Up' - vector of the camera coordinate system relative to
-    #  the coordinate space defined by the corresponding node.
-    #  The 'right' vector of the camera coordinate system is
-    #  the cross product of  the up and lookAt vectors.
-    #  The default value is 0|1|0. The vector
-    #  may be normalized, but it needn't.
     up: numpy.ndarray = SimpleAccessor(name='mUp', adapter=Vector3D)
+    """
+    'Up' - vector of the camera coordinate system relative to
+     the coordinate space defined by the corresponding node.
+     The 'right' vector of the camera coordinate system is
+     the cross product of  the up and lookAt vectors.
+     The default value is 0|1|0. The vector
+     may be normalized, but it needn't.
+    """
 
-    # 'LookAt' - vector of the camera coordinate system relative to
-    #  the coordinate space defined by the corresponding node.
-    #  This is the viewing direction of the user.
-    #  The default value is 0|0|1. The vector
-    #  may be normalized, but it needn't.
     look_at: numpy.ndarray = SimpleAccessor(name='mLookAt', adapter=Vector3D)
+    """
+    'LookAt' - vector of the camera coordinate system relative to
+     the coordinate space defined by the corresponding node.
+     This is the viewing direction of the user.
+     The default value is 0|0|1. The vector
+     may be normalized, but it needn't.
+    """
 
-    # Half horizontal field of view angle, in radians.
-    #  The field of view angle is the angle between the center
-    #  line of the screen and the left or right border.
-    #  The default value is 1/4PI.
     horizontal_fov: float = SimpleAccessor(name='mHorizontalFOV')
+    """
+    Half horizontal field of view angle, in radians.
+     The field of view angle is the angle between the center
+     line of the screen and the left or right border.
+     The default value is 1/4PI.
+    """
 
-    # Distance of the near clipping plane from the camera.
-    # The value may not be 0.f (for arithmetic reasons to prevent
-    # a division through zero). The default value is 0.1f.
     clip_plane_near: float = SimpleAccessor(name='mClipPlaneNear')
+    """
+    Distance of the near clipping plane from the camera.
+    The value may not be 0.f (for arithmetic reasons to prevent
+    a division through zero). The default value is 0.1f.
+    """
 
-    # Distance of the far clipping plane from the camera.
-    # The far clipping plane must, of course, be further away than the
-    # near clipping plane. The default value is 1000.f. The ratio
-    # between the near and the far plane should not be too
-    # large (between 1000-10000 should be ok) to avoid floating-point
-    # inaccuracies which could lead to z-fighting.
     clip_plane_far: float = SimpleAccessor(name='mClipPlaneFar')
+    """
+    Distance of the far clipping plane from the camera.
+    The far clipping plane must, of course, be further away than the
+    near clipping plane. The default value is 1000.f. The ratio
+    between the near and the far plane should not be too
+    large (between 1000-10000 should be ok) to avoid floating-point
+    inaccuracies which could lead to z-fighting.
+    """
 
-    # Screen aspect ratio.
-    # This is the ration between the width and the height of the
-    # screen. Typical values are 4/3, 1/2 or 1/1. This value is
-    # 0 if the aspect ratio is not defined in the source file.
-    # 0 is also the default value.
     aspect: float = SimpleAccessor(name='mAspect')
+    """
+    Screen aspect ratio.
+    This is the ration between the width and the height of the
+    screen. Typical values are 4/3, 1/2 or 1/1. This value is
+    0 if the aspect ratio is not defined in the source file.
+    0 is also the default value.
+    """
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -1172,11 +1304,11 @@ class VectorKey(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiVectorKey"
 
-    # The time of this key
     time: float = SimpleAccessor(name='mTime')
+    """The time of this key"""
 
-    # The value of this key
     value: numpy.ndarray = SimpleAccessor(name='mValue', adapter=Vector3D)
+    """The value of this key"""
 
 
 C_SRC += """
@@ -1192,11 +1324,11 @@ class QuatKey(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiQuatKey"
 
-    # The time of this key
     time: float = SimpleAccessor(name='mTime')
+    """The time of this key"""
 
-    # The value of this key
     value: numpy.ndarray = SimpleAccessor(name='mValue', adapter=Quaternion)
+    """The value of this key"""
 
 
 C_SRC += """
@@ -1214,15 +1346,15 @@ class MeshMorphKey(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMeshMorphKey"
 
-    # The time of this key
     time: float = SimpleAccessor(name='mTime')
+    """The time of this key"""
 
-    # The values and weights at the time of this key
     values: Optional[int] = SimpleAccessor(name='mValues')
-    weights: Optional[float] = SimpleAccessor(name='mWeights')
+    """The values and weights at the time of this key"""
 
-    # The number of values and weights
+    weights: Optional[float] = SimpleAccessor(name='mWeights')
     num_values_and_weights: int = SimpleAccessor(name='mNumValuesAndWeights')
+    """The number of values and weights"""
 
 
 C_SRC += """
@@ -1245,49 +1377,61 @@ class NodeAnim(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiNodeAnim"
 
-    # The name of the node affected by this animation. The node
-    #  must exist and it must be unique.
     node_name: str = SimpleAccessor(name='mNodeName', adapter=StringAdapter)
+    """
+    The name of the node affected by this animation. The node
+     must exist and it must be unique.
+    """
 
-    # The number of position keys
     num_position_keys: int = SimpleAccessor(name='mNumPositionKeys')
+    """The number of position keys"""
 
-    # The position keys of this animation channel. Positions are
-    # specified as 3D vector. The array is mNumPositionKeys in size.
-    # If there are position keys, there will also be at least one
-    # scaling and one rotation key.
     position_keys: Sequence[VectorKey] = DynamicSequenceAccessor('mPositionKeys', 'mNumPositionKeys', VectorKey)
+    """
+    The position keys of this animation channel. Positions are
+    specified as 3D vector. The array is mNumPositionKeys in size.
+    If there are position keys, there will also be at least one
+    scaling and one rotation key.
+    """
 
-    # The number of rotation keys
     num_rotation_keys: int = SimpleAccessor(name='mNumRotationKeys')
+    """The number of rotation keys"""
 
-    # The rotation keys of this animation channel. Rotations are
-    #  given as quaternions,  which are 4D vectors. The array is
-    #  mNumRotationKeys in size.
-    # If there are rotation keys, there will also be at least one
-    # scaling and one position key.
     rotation_keys: Sequence[QuatKey] = DynamicSequenceAccessor('mRotationKeys', 'mNumRotationKeys', QuatKey)
+    """
+    The rotation keys of this animation channel. Rotations are
+     given as quaternions,  which are 4D vectors. The array is
+     mNumRotationKeys in size.
+    If there are rotation keys, there will also be at least one
+    scaling and one position key.
+    """
 
-    # The number of scaling keys
     num_scaling_keys: int = SimpleAccessor(name='mNumScalingKeys')
+    """The number of scaling keys"""
 
-    # The scaling keys of this animation channel. Scalings are
-    #  specified as 3D vector. The array is mNumScalingKeys in size.
-    # If there are scaling keys, there will also be at least one
-    # position and one rotation key.
     scaling_keys: Sequence[VectorKey] = DynamicSequenceAccessor('mScalingKeys', 'mNumScalingKeys', VectorKey)
+    """
+    The scaling keys of this animation channel. Scalings are
+     specified as 3D vector. The array is mNumScalingKeys in size.
+    If there are scaling keys, there will also be at least one
+    position and one rotation key.
+    """
 
-    # Defines how the animation behaves before the first
-    #  key is encountered.
-    #  The default value is aiAnimBehaviour_DEFAULT (the original
-    #  transformation matrix of the affected node is used).
     pre_state: int = SimpleAccessor(name='mPreState')
+    """
+    Defines how the animation behaves before the first
+     key is encountered.
+     The default value is aiAnimBehaviour_DEFAULT (the original
+     transformation matrix of the affected node is used).
+    """
 
-    # Defines how the animation behaves after the last
-    #  key was processed.
-    #  The default value is aiAnimBehaviour_DEFAULT (the original
-    #  transformation matrix of the affected node is taken).
     post_state: int = SimpleAccessor(name='mPostState')
+    """
+    Defines how the animation behaves after the last
+     key was processed.
+     The default value is aiAnimBehaviour_DEFAULT (the original
+     transformation matrix of the affected node is taken).
+    """
 
 
 C_SRC += """
@@ -1304,17 +1448,19 @@ class MeshAnim(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMeshAnim"
 
-    # Name of the mesh to be animated. An empty string is not allowed,
-    #  animated meshes need to be named (not necessarily uniquely,
-    #  the name can basically serve as wild-card to select a group
-    #  of meshes with similar animation setup)
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """
+    Name of the mesh to be animated. An empty string is not allowed,
+     animated meshes need to be named (not necessarily uniquely,
+     the name can basically serve as wild-card to select a group
+     of meshes with similar animation setup)
+    """
 
-    # Size of the #mKeys array. Must be 1, at least.
     num_keys: int = SimpleAccessor(name='mNumKeys')
+    """Size of the #mKeys array. Must be 1, at least."""
 
-    # Key frames of the animation. May not be NULL.
     keys: Sequence[MeshKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshKey)
+    """Key frames of the animation. May not be NULL."""
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -1334,17 +1480,19 @@ class MeshMorphAnim(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMeshMorphAnim"
 
-    # Name of the mesh to be animated. An empty string is not allowed,
-    # animated meshes need to be named (not necessarily uniquely,
-    # the name can basically serve as wildcard to select a group
-    # of meshes with similar animation setup)
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """
+    Name of the mesh to be animated. An empty string is not allowed,
+    animated meshes need to be named (not necessarily uniquely,
+    the name can basically serve as wildcard to select a group
+    of meshes with similar animation setup)
+    """
 
-    # Size of the #mKeys array. Must be 1, at least.
     num_keys: int = SimpleAccessor(name='mNumKeys')
+    """Size of the #mKeys array. Must be 1, at least."""
 
-    # Key frames of the animation. May not be NULL.
     keys: Sequence[MeshMorphKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshMorphKey)
+    """Key frames of the animation. May not be NULL."""
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -1370,40 +1518,54 @@ class Animation(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiAnimation"
 
-    # The name of the animation. If the modeling package this data was
-    #  exported from does support only a single animation channel, this
-    #  name is usually empty (length is zero).
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
+    """
+    The name of the animation. If the modeling package this data was
+     exported from does support only a single animation channel, this
+     name is usually empty (length is zero).
+    """
 
-    # Duration of the animation in ticks.
     duration: float = SimpleAccessor(name='mDuration')
+    """Duration of the animation in ticks."""
 
-    # Ticks per second. 0 if not specified in the imported file
     ticks_per_second: float = SimpleAccessor(name='mTicksPerSecond')
+    """Ticks per second. 0 if not specified in the imported file"""
 
-    # The number of bone animation channels. Each channel affects
-    #  a single node.
     num_channels: int = SimpleAccessor(name='mNumChannels')
+    """
+    The number of bone animation channels. Each channel affects
+     a single node.
+    """
 
-    # The node animation channels. Each channel affects a single node.
-    #  The array is mNumChannels in size.
     channels: Sequence[NodeAnim] = DynamicSequenceAccessor('mChannels', 'mNumChannels', NodeAnim)
+    """
+    The node animation channels. Each channel affects a single node.
+     The array is mNumChannels in size.
+    """
 
-    # The number of mesh animation channels. Each channel affects
-    #  a single mesh and defines vertex-based animation.
     num_mesh_channels: int = SimpleAccessor(name='mNumMeshChannels')
+    """
+    The number of mesh animation channels. Each channel affects
+     a single mesh and defines vertex-based animation.
+    """
 
-    # The mesh animation channels. Each channel affects a single mesh.
-    #  The array is mNumMeshChannels in size.
     mesh_channels: Sequence[MeshAnim] = DynamicSequenceAccessor('mMeshChannels', 'mNumMeshChannels', MeshAnim)
+    """
+    The mesh animation channels. Each channel affects a single mesh.
+     The array is mNumMeshChannels in size.
+    """
 
-    # The number of mesh animation channels. Each channel affects
-    # a single mesh and defines morphing animation.
     num_morph_mesh_channels: int = SimpleAccessor(name='mNumMorphMeshChannels')
+    """
+    The number of mesh animation channels. Each channel affects
+    a single mesh and defines morphing animation.
+    """
 
-    # The morph mesh animation channels. Each channel affects a single mesh.
-    # The array is mNumMorphMeshChannels in size.
     morph_mesh_channels: Sequence[MeshMorphAnim] = DynamicSequenceAccessor('mMorphMeshChannels', 'mNumMorphMeshChannels', MeshMorphAnim)
+    """
+    The morph mesh animation channels. Each channel affects a single mesh.
+    The array is mNumMorphMeshChannels in size.
+    """
 
     def __repr__(self):
         return f'{self.__class__.__name__}<name={self.name!r}>'
@@ -1426,27 +1588,29 @@ class ExportDataBlob(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiExportDataBlob"
 
-    # Size of the data in bytes
     size: int = SimpleAccessor()
+    """Size of the data in bytes"""
 
-    # The data.
     data: Optional[Any] = SimpleAccessor()
+    """The data."""
 
-    # Name of the blob. An empty string always
-    # indicates the first (and primary) blob,
-    # which contains the actual file data.
-    # Any other blobs are auxiliary files produced
-    # by exporters (i.e. material files). Existence
-    # of such files depends on the file format. Most
-    # formats don't split assets across multiple files.
-    #
-    # If used, blob names usually contain the file
-    # extension that should be used when writing
-    # the data to disc.
     name: str = SimpleAccessor(adapter=StringAdapter)
+    """
+    Name of the blob. An empty string always
+    indicates the first (and primary) blob,
+    which contains the actual file data.
+    Any other blobs are auxiliary files produced
+    by exporters (i.e. material files). Existence
+    of such files depends on the file format. Most
+    formats don't split assets across multiple files.
 
-    # Pointer to the next blob in the chain or NULL if there is none.
+    If used, blob names usually contain the file
+    extension that should be used when writing
+    the data to disc.
+    """
+
     next: Optional['ExportDataBlob'] = SimpleAccessor(adapter=LazyStruct(lambda: ExportDataBlob))
+    """Pointer to the next blob in the chain or NULL if there is none."""
 
 
 C_SRC += """
@@ -1476,83 +1640,105 @@ class Scene(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiScene"
 
-    # Any combination of the AI_SCENE_FLAGS_XXX flags. By default
-    # this value is 0, no flags are set. Most applications will
-    # want to reject all scenes with the AI_SCENE_FLAGS_INCOMPLETE
-    # bit set.
     flags: int = SimpleAccessor(name='mFlags')
+    """
+    Any combination of the AI_SCENE_FLAGS_XXX flags. By default
+    this value is 0, no flags are set. Most applications will
+    want to reject all scenes with the AI_SCENE_FLAGS_INCOMPLETE
+    bit set.
+    """
 
-    # The root node of the hierarchy.
-    # There will always be at least the root node if the import
-    # was successful (and no special flags have been set).
-    # Presence of further nodes depends on the format and content
-    # of the imported file.
     root_node: Optional[Node] = SimpleAccessor(name='mRootNode', adapter=Node)
+    """
+    The root node of the hierarchy.
+    There will always be at least the root node if the import
+    was successful (and no special flags have been set).
+    Presence of further nodes depends on the format and content
+    of the imported file.
+    """
 
-    # The number of meshes in the scene.
     num_meshes: int = SimpleAccessor(name='mNumMeshes')
+    """The number of meshes in the scene."""
 
-    # The array of meshes.
-    # Use the indices given in the aiNode structure to access
-    # this array. The array is mNumMeshes in size. If the
-    # AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
-    # be at least ONE material.
     meshes: Sequence[Mesh] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', Mesh)
+    """
+    The array of meshes.
+    Use the indices given in the aiNode structure to access
+    this array. The array is mNumMeshes in size. If the
+    AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
+    be at least ONE material.
+    """
 
-    # The number of materials in the scene.
     num_materials: int = SimpleAccessor(name='mNumMaterials')
+    """The number of materials in the scene."""
 
-    # The array of materials.
-    # Use the index given in each aiMesh structure to access this
-    # array. The array is mNumMaterials in size. If the
-    # AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
-    # be at least ONE material.
     materials: Sequence[Material] = DynamicSequenceAccessor('mMaterials', 'mNumMaterials', Material)
+    """
+    The array of materials.
+    Use the index given in each aiMesh structure to access this
+    array. The array is mNumMaterials in size. If the
+    AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
+    be at least ONE material.
+    """
 
-    # The number of animations in the scene.
     num_animations: int = SimpleAccessor(name='mNumAnimations')
+    """The number of animations in the scene."""
 
-    # The array of animations.
-    # All animations imported from the given file are listed here.
-    # The array is mNumAnimations in size.
     animations: Sequence[Animation] = DynamicSequenceAccessor('mAnimations', 'mNumAnimations', Animation)
+    """
+    The array of animations.
+    All animations imported from the given file are listed here.
+    The array is mNumAnimations in size.
+    """
 
-    # The number of textures embedded into the file
     num_textures: int = SimpleAccessor(name='mNumTextures')
+    """The number of textures embedded into the file"""
 
-    # The array of embedded textures.
-    # Not many file formats embed their textures into the file.
-    # An example is Quake's MDL format (which is also used by
-    # some GameStudio versions)
     textures: Sequence[Texture] = DynamicSequenceAccessor('mTextures', 'mNumTextures', Texture)
+    """
+    The array of embedded textures.
+    Not many file formats embed their textures into the file.
+    An example is Quake's MDL format (which is also used by
+    some GameStudio versions)
+    """
 
-    # The number of light sources in the scene. Light sources
-    # are fully optional, in most cases this attribute will be 0
     num_lights: int = SimpleAccessor(name='mNumLights')
+    """
+    The number of light sources in the scene. Light sources
+    are fully optional, in most cases this attribute will be 0
+    """
 
-    # The array of light sources.
-    # All light sources imported from the given file are
-    # listed here. The array is mNumLights in size.
     lights: Sequence[Light] = DynamicSequenceAccessor('mLights', 'mNumLights', Light)
+    """
+    The array of light sources.
+    All light sources imported from the given file are
+    listed here. The array is mNumLights in size.
+    """
 
-    # The number of cameras in the scene. Cameras
-    # are fully optional, in most cases this attribute will be 0
     num_cameras: int = SimpleAccessor(name='mNumCameras')
+    """
+    The number of cameras in the scene. Cameras
+    are fully optional, in most cases this attribute will be 0
+    """
 
-    # The array of cameras.
-    # All cameras imported from the given file are listed here.
-    # The array is mNumCameras in size. The first camera in the
-    # array (if existing) is the default camera view into
-    # the scene.
     cameras: Sequence[Camera] = DynamicSequenceAccessor('mCameras', 'mNumCameras', Camera)
+    """
+    The array of cameras.
+    All cameras imported from the given file are listed here.
+    The array is mNumCameras in size. The first camera in the
+    array (if existing) is the default camera view into
+    the scene.
+    """
 
-    # This data contains global metadata which belongs to the scene like
-    # unit-conversions, versions, vendors or other model-specific data. This
-    # can be used to store format-specific metadata as well.
     metadata: Optional[Metadata] = SimpleAccessor(name='mMetadata', adapter=Metadata)
+    """
+    This data contains global metadata which belongs to the scene like
+    unit-conversions, versions, vendors or other model-specific data. This
+    can be used to store format-specific metadata as well.
+    """
 
-    # Internal data, do not touch
     private: Optional[Any] = SimpleAccessor(name='mPrivate')
+    """Internal data, do not touch"""
 
 
 ffi.cdef(FUNCTION_DECLS + C_SRC)
