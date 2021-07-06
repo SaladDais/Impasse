@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-#-*- coding: UTF-8 -*-
 
 """
 This module uses the sample.py script to load all test models it finds.
@@ -11,24 +10,24 @@ loading and querying of 3d models using impasse works.
 
 import os
 import os.path
+import sys
 
 import sample
 from impasse import errors
 
-here = os.path.abspath(os.path.dirname(__file__))
-
 # Paths to model files.
-basepaths = [os.path.join(here, '..', '..', '..', 'test', 'models'),
-             os.path.join(here, '..', '..', '..', 'test', 'models-nonbsd')]
+BASE_PATHS = [os.path.join('test', 'models'),
+              os.path.join('test', 'models-nonbsd')]
 
 # Valid extensions for 3D model files.
 extensions = ['.3ds', '.x', '.lwo', '.obj', '.md5mesh', '.dxf', '.ply', '.stl',
               '.dae', '.md5anim', '.lws', '.irrmesh', '.nff', '.off', '.blend']
 
 
-def run_tests():
+def run_tests(assimp_repo_path: str):
     ok, err = 0, 0
-    for path in basepaths:
+    paths = [os.path.join(assimp_repo_path, b) for b in BASE_PATHS]
+    for path in paths:
         print("Looking for models in %s..." % path)
         for root, dirs, files in os.walk(path):
             for afile in files:
@@ -53,4 +52,4 @@ def run_tests():
 
 
 if __name__ == '__main__':
-    run_tests()
+    run_tests(sys.argv[1])
