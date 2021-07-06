@@ -12,7 +12,7 @@ struct aiVector2D {
 """
 
 
-class Vector2D(NumPyAdapter):
+class Vector2D(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiVector2D"
     SHAPE = (2,)
@@ -38,7 +38,7 @@ struct aiMatrix3x3 {
 """
 
 
-class Matrix3x3(NumPyAdapter):
+class Matrix3x3(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiMatrix3x3"
     SHAPE = (3, 3)
@@ -66,7 +66,7 @@ struct aiTexel {
 """
 
 
-class Texel(NumPyAdapter):
+class Texel(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiTexel"
     SHAPE = (4,)
@@ -89,7 +89,7 @@ struct aiColor4D {
 """
 
 
-class Color4D(NumPyAdapter):
+class Color4D(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiColor4D"
     SHAPE = (4,)
@@ -113,7 +113,7 @@ struct aiPlane {
 """
 
 
-class Plane(NumPyAdapter):
+class Plane(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiPlane"
     SHAPE = (2,)
@@ -136,7 +136,7 @@ struct aiColor3D {
 """
 
 
-class Color3D(NumPyAdapter):
+class Color3D(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiColor3D"
     SHAPE = (3,)
@@ -250,7 +250,7 @@ struct aiQuaternion {
 """
 
 
-class Quaternion(NumPyAdapter):
+class Quaternion(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiQuaternion"
     SHAPE = (4,)
@@ -329,7 +329,7 @@ struct aiMatrix4x4 {
 """
 
 
-class Matrix4x4(NumPyAdapter):
+class Matrix4x4(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiMatrix4x4"
     SHAPE = (4, 4)
@@ -363,7 +363,7 @@ struct aiVector3D {
 """
 
 
-class Vector3D(NumPyAdapter):
+class Vector3D(NumPyStruct):
     __slots__ = ()
     C_TYPE = "struct aiVector3D"
     SHAPE = (3,)
