@@ -57,6 +57,26 @@ class ImpasseTests(unittest.TestCase):
             with impasse.export_blob(scene, "collada") as blob:
                 self.assertTrue(blob.data.startswith(b"<?xml"))
 
+    def test_scene_immutable(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            with self.assertRaises(AttributeError):
+                scene.root_node.name = "foobaz"
+
+    def test_copy_scene(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            with scene.copy() as scene_copy:
+                self.assertIsNotNone(scene_copy.root_node)
+
+    def test_scene_copies_mutable(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            with scene.copy() as scene_copy:
+                scene_copy.root_node.name = "foobaz"
+                self.assertEqual(scene_copy.root_node.name, "foobaz")
+                with impasse.export_blob(scene_copy, "collada") as blob:
+                    self.assertTrue(b"foobaz" in blob.data)
+                # Original should not be changed
+                self.assertNotEqual(scene.root_node.name, "foobaz")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -12,7 +12,7 @@ import logging
 from . import helper
 from .constants import ProcessingStep
 from .errors import AssimpError
-from .structs import Scene, ExportDataBlob
+from .structs import Scene, ExportDataBlob, ffi
 
 logger = logging.getLogger("impasse")
 # attach default null handler to logger so it doesn't complain
@@ -28,12 +28,31 @@ class ImportedScene(Scene):
         super().__init__(struct_val)
         self._readonly = True
 
+    def copy(self) -> CopiedScene:
+        copy_out = ffi.new("struct aiScene **")
+        _assimp_lib.aiCopyScene(self.struct, copy_out)
+        if not copy_out[0]:
+            raise AssimpError("Unable to copy scene")
+        return CopiedScene(copy_out[0])
+
     def __enter__(self) -> ImportedScene:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         # TODO: ffi.gc() instead?
         release_import(self)
+
+
+class CopiedScene(Scene):
+    def __init__(self, struct_val):
+        super().__init__(struct_val)
+        self._readonly = False
+
+    def __enter__(self) -> CopiedScene:
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        release_scene_copy(self)
 
 
 class OwnedExportDataBlob(ExportDataBlob):
@@ -166,3 +185,7 @@ def export_blob(
 
 def release_export_blob(blob: ExportDataBlob):
     _assimp_lib.aiReleaseExportBlob(blob.struct)
+
+
+def release_scene_copy(scene: Scene):
+    _assimp_lib.aiFreeScene(scene.struct)
