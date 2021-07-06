@@ -8,7 +8,7 @@ Requires Python >= 3.7.
 
 It's largely based on [PyAssimp](https://github.com/assimp/assimp/tree/master/port/PyAssimp),
 Assimp's official Python port. In contrast to PyAssimp, it strictly targets modern Python 3 and
-provides type hints. It also  aims to allow mutating scenes before exporting by having
+provides type hints. It also aims to allow mutating scenes before exporting by having
 all wrapper classes operate directly on the underlying C data structures.
 
 Note that impasse is not complete. Many ASSIMP features are missing.
@@ -88,3 +88,31 @@ Impasse requires an assimp dynamic library (`DLL` on Windows,
 To build that library, refer to the Assimp master `INSTALL`
 instructions. To look in more places, edit `./impasse/helper.py`.
 There's an `additional_dirs` list waiting for your entries.
+
+# Performance
+
+Impasse tries to avoid unnecessary copies or conversions of data owned by C, and most classes
+are just thin layers around the underlying CFFI structs. NumPy arrays that directly map to the
+underlying structs' memory are used for the coordinate structs like `Matrix4x4` and `Vector3D`.
+
+Testing with the same `quicktest.py` script against assimp's test model directory:
+
+## Impasse
+
+```
+** Loaded 169 models, got controlled errors for 28 files
+
+real	0m1.643s
+user	0m1.912s
+sys	0m0.531s
+```
+
+## PyAssimp
+
+```
+** Loaded 165 models, got controlled errors for 28 files
+
+real	0m7.607s
+user	0m7.746s
+sys	0m0.579s
+```
