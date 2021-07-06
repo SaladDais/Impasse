@@ -568,7 +568,9 @@ class ProcessingStep(enum.IntFlag):
     EmbedTextures = 0x10000000
 
 
-class ProcessingPreset(enum.IntEnum):
+class ProcessingPreset:
+    def __init__(self):
+        raise NotImplementedError()
 
     # @def ConvertToLeftHanded
     #  @brief Shortcut flag for Direct3D-based applications.
