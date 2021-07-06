@@ -8,3 +8,4 @@ build/*
 dist/*
 .coverage
 .eggs
+.pytest_cache
