@@ -423,7 +423,7 @@ class MaterialMapping(Mapping[PROPERTY_KEY, PROPERTY_VAL]):
         self.material = material
 
     def __len__(self) -> int:
-        return self.material.num_properties
+        return len(self.material.properties)
 
     def __iter__(self) -> Iterator[REAL_PROPERTY_KEY]:
         return iter(((p.key, p.semantic) for p in self.material.properties))
