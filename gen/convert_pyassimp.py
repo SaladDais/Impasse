@@ -199,7 +199,7 @@ def print_code():
         print("\"\"\"\n\n")
         base_wrapper_cls = "SerializableStruct"
         if struct_cls_name in TUPLE_STRUCTS:
-            base_wrapper_cls = "NumPyAdapter"
+            base_wrapper_cls = "NumPyStruct"
         print(f"class {struct_cls_name}({base_wrapper_cls}):")
         print("    __slots__ = ()")
         print(f"    C_TYPE = \"struct ai{struct_cls_name}\"")

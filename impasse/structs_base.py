@@ -112,7 +112,7 @@ class CStrAdapter(CSerializableBase):
         raise NotImplementedError()
 
 
-class NumPyAdapter(SerializableStruct):
+class NumPyStruct(SerializableStruct):
     SHAPE: ClassVar[Tuple[int, ...]]
     DTYPE: ClassVar[numpy.dtype]
 
@@ -129,12 +129,25 @@ class NumPyAdapter(SerializableStruct):
         return arr
 
     @classmethod
-    def to_c(cls, instance, val: numpy.ndarray):
+    def to_c(cls, instance, val: Union[numpy.ndarray, NumPyStruct]):
+        if isinstance(val, NumPyStruct):
+            return super().to_c(instance, val)
+
         if val.dtype != cls.DTYPE:
             raise ValueError(f"{val.dtype} != {cls.DTYPE}")
         if val.size != math.prod(cls.SHAPE):
             raise ValueError(f"{val.size} != {math.prod(cls.SHAPE)}")
         ffi.buffer(instance, cls.get_size())[:] = val.flatten().data
+
+    @classmethod
+    def struct_from_c(cls, struct_val, scene: Optional[Scene] = None):
+        """
+        Fetch the actual struct from cdata
+
+        Should be infrequently needed, but there may be some functions that require
+        passing the struct itself.
+        """
+        return super().from_c(struct_val, scene)
 
 
 class StringAdapter(SerializableStruct):
