@@ -212,6 +212,12 @@ def print_code():
         print("")
         had_comment = False
         for field_name, type_data in fields_type_data.items():
+            if field_name.startswith("mNum"):
+                if "m" + type_data.base_name[3:] in fields_type_data:
+                    # A count field that seems to have a directly associated collection
+                    # field. No point adding both to the API.
+                    continue
+
             if had_comment:
                 print("")
                 had_comment = False

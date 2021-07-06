@@ -284,13 +284,6 @@ class Face(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiFace"
 
-    num_indices: int = SimpleAccessor(name='mNumIndices')
-    """
-     Number of indices defining this face.
-     The maximum value for this member is
-    AI_MAX_FACE_INDICES.
-    """
-
     indices: Sequence[int] = DynamicSequenceAccessor('mIndices', 'mNumIndices', None)
     """ Pointer to the indices array. Size of the array is given in numIndices."""
 
@@ -507,14 +500,8 @@ class Node(SerializableStruct):
     parent: Optional['Node'] = SimpleAccessor(name='mParent', adapter=LazyStruct(lambda: Node))
     """Parent node. NULL if this node is the root node."""
 
-    num_children: int = SimpleAccessor(name='mNumChildren')
-    """The number of child nodes of this node."""
-
     children: Sequence['Node'] = DynamicSequenceAccessor('mChildren', 'mNumChildren', LazyStruct(lambda: Node))
     """The child nodes of this node. NULL if mNumChildren is 0."""
-
-    num_meshes: int = SimpleAccessor(name='mNumMeshes')
-    """The number of meshes of this node."""
 
     meshes: Sequence[int] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', None)
     """The meshes of this node. Each entry is an index into the mesh"""
@@ -890,9 +877,6 @@ class Material(SerializableStruct):
     properties: Sequence[MaterialProperty] = DynamicSequenceAccessor('mProperties', 'mNumProperties', MaterialProperty)
     """List of all material properties loaded."""
 
-    num_properties: int = SimpleAccessor(name='mNumProperties')
-    """Number of properties in the data base"""
-
     num_allocated: int = SimpleAccessor(name='mNumAllocated')
     """Storage allocated"""
 
@@ -917,13 +901,6 @@ class Bone(SerializableStruct):
 
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
     """ The name of the bone."""
-
-    num_weights: int = SimpleAccessor(name='mNumWeights')
-    """
-     The number of vertices affected by this bone
-     The maximum value for this member is
-    AI_MAX_BONE_WEIGHTS.
-    """
 
     weights: Sequence[VertexWeight] = DynamicSequenceAccessor('mWeights', 'mNumWeights', VertexWeight)
     """ The vertices affected by this bone"""
@@ -983,17 +960,6 @@ class AnimMesh(SerializableStruct):
     texture_coords: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mTextureCoords', 8, Vector3D)
     """Replacement for aiMesh::mTextureCoords"""
 
-    num_vertices: int = SimpleAccessor(name='mNumVertices')
-    """
-    The number of vertices in the aiAnimMesh, and thus the length of all
-    the member arrays.
-
-    This has always the same value as the mNumVertices property in the
-    corresponding aiMesh. It is duplicated here merely to make the length
-    of the member arrays accessible even if the aiMesh is not known, e.g.
-    from language bindings.
-    """
-
     weight: float = SimpleAccessor(name='mWeight')
     """Weight of the AnimMesh."""
 
@@ -1036,22 +1002,6 @@ class Mesh(SerializableStruct):
     This specifies which types of primitives are present in the mesh.
     The "SortByPrimitiveType"-Step can be used to make sure the
     output meshes consist of one primitive type each.
-    """
-
-    num_vertices: int = SimpleAccessor(name='mNumVertices')
-    """
-    The number of vertices in this mesh.
-    This is also the size of all of the per-vertex data arrays.
-    The maximum value for this member is
-    AI_MAX_VERTICES.
-    """
-
-    num_faces: int = SimpleAccessor(name='mNumFaces')
-    """
-    The number of primitives (triangles, polygons, lines) in this  mesh.
-    This is also the size of the mFaces array.
-    The maximum value for this member is
-    AI_MAX_FACES.
     """
 
     vertices: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mVertices', 'mNumVertices', Vector3D)
@@ -1147,12 +1097,6 @@ class Mesh(SerializableStruct):
     is NOT set each face references an unique set of vertices.
     """
 
-    num_bones: int = SimpleAccessor(name='mNumBones')
-    """
-    The number of bones this mesh contains.
-    Can be 0, in which case the mBones array is NULL.
-    """
-
     bones: Sequence[Bone] = DynamicSequenceAccessor('mBones', 'mNumBones', Bone)
     """
     The bones of this mesh.
@@ -1181,9 +1125,6 @@ class Mesh(SerializableStruct):
          partitioning.
       - Vertex animations refer to meshes by their names.
     """
-
-    num_anim_meshes: int = SimpleAccessor(name='mNumAnimMeshes')
-    """The number of attachment meshes. Note! Currently only works with Collada loader."""
 
     anim_meshes: Sequence[AnimMesh] = DynamicSequenceAccessor('mAnimMeshes', 'mNumAnimMeshes', AnimMesh)
     """
@@ -1383,9 +1324,6 @@ class NodeAnim(SerializableStruct):
      must exist and it must be unique.
     """
 
-    num_position_keys: int = SimpleAccessor(name='mNumPositionKeys')
-    """The number of position keys"""
-
     position_keys: Sequence[VectorKey] = DynamicSequenceAccessor('mPositionKeys', 'mNumPositionKeys', VectorKey)
     """
     The position keys of this animation channel. Positions are
@@ -1393,9 +1331,6 @@ class NodeAnim(SerializableStruct):
     If there are position keys, there will also be at least one
     scaling and one rotation key.
     """
-
-    num_rotation_keys: int = SimpleAccessor(name='mNumRotationKeys')
-    """The number of rotation keys"""
 
     rotation_keys: Sequence[QuatKey] = DynamicSequenceAccessor('mRotationKeys', 'mNumRotationKeys', QuatKey)
     """
@@ -1405,9 +1340,6 @@ class NodeAnim(SerializableStruct):
     If there are rotation keys, there will also be at least one
     scaling and one position key.
     """
-
-    num_scaling_keys: int = SimpleAccessor(name='mNumScalingKeys')
-    """The number of scaling keys"""
 
     scaling_keys: Sequence[VectorKey] = DynamicSequenceAccessor('mScalingKeys', 'mNumScalingKeys', VectorKey)
     """
@@ -1456,9 +1388,6 @@ class MeshAnim(SerializableStruct):
      of meshes with similar animation setup)
     """
 
-    num_keys: int = SimpleAccessor(name='mNumKeys')
-    """Size of the #mKeys array. Must be 1, at least."""
-
     keys: Sequence[MeshKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshKey)
     """Key frames of the animation. May not be NULL."""
 
@@ -1487,9 +1416,6 @@ class MeshMorphAnim(SerializableStruct):
     the name can basically serve as wildcard to select a group
     of meshes with similar animation setup)
     """
-
-    num_keys: int = SimpleAccessor(name='mNumKeys')
-    """Size of the #mKeys array. Must be 1, at least."""
 
     keys: Sequence[MeshMorphKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshMorphKey)
     """Key frames of the animation. May not be NULL."""
@@ -1531,34 +1457,16 @@ class Animation(SerializableStruct):
     ticks_per_second: float = SimpleAccessor(name='mTicksPerSecond')
     """Ticks per second. 0 if not specified in the imported file"""
 
-    num_channels: int = SimpleAccessor(name='mNumChannels')
-    """
-    The number of bone animation channels. Each channel affects
-     a single node.
-    """
-
     channels: Sequence[NodeAnim] = DynamicSequenceAccessor('mChannels', 'mNumChannels', NodeAnim)
     """
     The node animation channels. Each channel affects a single node.
      The array is mNumChannels in size.
     """
 
-    num_mesh_channels: int = SimpleAccessor(name='mNumMeshChannels')
-    """
-    The number of mesh animation channels. Each channel affects
-     a single mesh and defines vertex-based animation.
-    """
-
     mesh_channels: Sequence[MeshAnim] = DynamicSequenceAccessor('mMeshChannels', 'mNumMeshChannels', MeshAnim)
     """
     The mesh animation channels. Each channel affects a single mesh.
      The array is mNumMeshChannels in size.
-    """
-
-    num_morph_mesh_channels: int = SimpleAccessor(name='mNumMorphMeshChannels')
-    """
-    The number of mesh animation channels. Each channel affects
-    a single mesh and defines morphing animation.
     """
 
     morph_mesh_channels: Sequence[MeshMorphAnim] = DynamicSequenceAccessor('mMorphMeshChannels', 'mNumMorphMeshChannels', MeshMorphAnim)
@@ -1657,9 +1565,6 @@ class Scene(SerializableStruct):
     of the imported file.
     """
 
-    num_meshes: int = SimpleAccessor(name='mNumMeshes')
-    """The number of meshes in the scene."""
-
     meshes: Sequence[Mesh] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', Mesh)
     """
     The array of meshes.
@@ -1668,9 +1573,6 @@ class Scene(SerializableStruct):
     AI_SCENE_FLAGS_INCOMPLETE flag is not set there will always
     be at least ONE material.
     """
-
-    num_materials: int = SimpleAccessor(name='mNumMaterials')
-    """The number of materials in the scene."""
 
     materials: Sequence[Material] = DynamicSequenceAccessor('mMaterials', 'mNumMaterials', Material)
     """
@@ -1681,18 +1583,12 @@ class Scene(SerializableStruct):
     be at least ONE material.
     """
 
-    num_animations: int = SimpleAccessor(name='mNumAnimations')
-    """The number of animations in the scene."""
-
     animations: Sequence[Animation] = DynamicSequenceAccessor('mAnimations', 'mNumAnimations', Animation)
     """
     The array of animations.
     All animations imported from the given file are listed here.
     The array is mNumAnimations in size.
     """
-
-    num_textures: int = SimpleAccessor(name='mNumTextures')
-    """The number of textures embedded into the file"""
 
     textures: Sequence[Texture] = DynamicSequenceAccessor('mTextures', 'mNumTextures', Texture)
     """
@@ -1702,23 +1598,11 @@ class Scene(SerializableStruct):
     some GameStudio versions)
     """
 
-    num_lights: int = SimpleAccessor(name='mNumLights')
-    """
-    The number of light sources in the scene. Light sources
-    are fully optional, in most cases this attribute will be 0
-    """
-
     lights: Sequence[Light] = DynamicSequenceAccessor('mLights', 'mNumLights', Light)
     """
     The array of light sources.
     All light sources imported from the given file are
     listed here. The array is mNumLights in size.
-    """
-
-    num_cameras: int = SimpleAccessor(name='mNumCameras')
-    """
-    The number of cameras in the scene. Cameras
-    are fully optional, in most cases this attribute will be 0
     """
 
     cameras: Sequence[Camera] = DynamicSequenceAccessor('mCameras', 'mNumCameras', Camera)
