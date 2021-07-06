@@ -12,7 +12,7 @@ setup(
     name='impasse',
     # Version chosen for parity with Assimp since we need ABI compatibility
     version='5.0.1',
-    license='ISC',
+    license='BSD',
     description='Alternate Python bindings for the Open Asset Import Library (ASSIMP)',
     long_description=readme(),
     long_description_content_type="text/markdown",
