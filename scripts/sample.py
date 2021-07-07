@@ -40,7 +40,7 @@ def main(filename=None):
     print("MESHES:")
     for index, mesh in enumerate(scene.meshes):
         print("  MESH" + str(index + 1))
-        print("    material id:" + str(mesh.material_index + 1))
+        print("    material id:" + str(scene.materials.index(mesh.material) + 1))
         print("    vertices:" + str(len(mesh.vertices)))
         print("    first 3 verts:\n" + str([tuple(v) for v in mesh.vertices[:3]]))
         if mesh.normals:

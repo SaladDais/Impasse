@@ -10,7 +10,7 @@ import numpy
 from .constants import MaterialPropertyType, MetadataType, TextureSemantic
 
 if TYPE_CHECKING:
-    from .structs import Texture, MaterialProperty, MetadataEntry, Material, Metadata, Scene
+    from .structs import Texture, MaterialProperty, MetadataEntry, Material, Metadata, Scene, Mesh
 
 ffi = cffi.FFI()
 
@@ -163,6 +163,53 @@ class StringAdapter(SerializableStruct):
             length = len(value) - 1
         instance.data = value
         instance.length = length
+
+
+class MeshIndexAdapter(CSerializableBase):
+    @classmethod
+    def from_c(cls, val: int, scene: Optional[Scene] = None):
+        if scene is None:
+            raise ValueError("scene may not be None")
+        return scene.meshes[val]
+
+    @classmethod
+    def to_c(cls, instance, val: Union[int, Mesh]):
+        if not isinstance(val, int):
+            val = val.get_scene().meshes.index(val)
+        instance[0] = val
+
+
+class MaterialIndexAdapter(CSerializableBase):
+    @classmethod
+    def from_c(cls, val: int, scene: Optional[Scene] = None):
+        if scene is None:
+            raise ValueError("scene may not be None")
+        return scene.materials[val]
+
+    @classmethod
+    def to_c(cls, instance, val: Union[int, Material]):
+        if not isinstance(val, int):
+            val = val.get_scene().materials.index(val)
+        instance[0] = val
+
+
+class TextureIndexAdapter(CSerializableBase):
+    @classmethod
+    def from_c(cls, val: int, scene: Optional[Scene] = None):
+        if scene is None:
+            raise ValueError("scene may not be None")
+        if not val:
+            return None
+        # "No texture" is specified by setting 0, so all indexes are shifted up by 1
+        return scene.textures[val - 1]
+
+    @classmethod
+    def to_c(cls, instance, val: Union[int, Texture]):
+        if val is None:
+            val = 0
+        elif not isinstance(val, int):
+            val = val.get_scene().textures.index(val) + 1
+        instance[0] = val
 
 
 _T = TypeVar("_T")

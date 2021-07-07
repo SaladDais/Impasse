@@ -77,6 +77,16 @@ class ImpasseTests(unittest.TestCase):
                 # Original should not be changed
                 self.assertNotEqual(scene.root_node.name, "foobaz")
 
+    def test_accessing_material_index(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            collada = None
+            for child in scene.root_node.children:
+                if child.name == "Collada":
+                    collada = child
+            self.assertIsNotNone(collada)
+            material_map = collada.meshes[0].material.as_mapping()
+            self.assertEqual(material_map["?mat.name"], "RedPlastic")
+
 
 if __name__ == "__main__":
     unittest.main()

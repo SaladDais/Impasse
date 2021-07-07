@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .structs_base import *
 
 C_SRC = ""
@@ -503,7 +505,7 @@ class Node(SerializableStruct):
     children: Sequence['Node'] = DynamicSequenceAccessor('mChildren', 'mNumChildren', LazyStruct(lambda: Node))
     """The child nodes of this node. NULL if mNumChildren is 0."""
 
-    meshes: Sequence[int] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', None)
+    meshes: Sequence[Mesh] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', MeshIndexAdapter)
     """The meshes of this node. Each entry is an index into the mesh"""
 
     metadata: Optional[Metadata] = SimpleAccessor(name='mMetadata', adapter=Metadata)
@@ -832,7 +834,7 @@ class MaterialProperty(SerializableStruct):
     aiTextureType_NONE).
     """
 
-    index: int = SimpleAccessor(name='mIndex')
+    texture: Optional[Texture] = SimpleAccessor(name='mIndex', adapter=TextureIndexAdapter)
     """
     Textures: Specifies the index of the texture.
      For non-texture properties, this member is always 0.
@@ -1104,7 +1106,7 @@ class Mesh(SerializableStruct):
     frame hierarchy and a set of vertex weights.
     """
 
-    material_index: int = SimpleAccessor(name='mMaterialIndex')
+    material: Material = SimpleAccessor(name='mMaterialIndex', adapter=MaterialIndexAdapter)
     """
     The material used by this mesh.
     A mesh does use only a single material. If an imported model uses
