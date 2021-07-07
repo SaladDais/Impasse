@@ -25,7 +25,7 @@ model using a shader-based OpenGL pipeline.
 To use it:
 
 ```bash
-python ./scripts/3d_viewer_py3.py <path to your model>
+python ./scripts/3d_viewer.py <path to your model>
 ```
 
 You can use this code as starting point in your applications.

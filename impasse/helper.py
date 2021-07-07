@@ -168,10 +168,4 @@ def search_library():
         candidates = map(lambda x: (os.lstat(x[0])[-2], x), candidates)
         res = max(candidates, key=operator.itemgetter(0))[1]
         logger.debug('Using assimp library located at ' + res[0])
-
-        # XXX: if there are 1000 dll/so files containing 'assimp'
-        # in their name, do we have all of them in our address
-        # space now until gc kicks in?
-
-        # XXX: take version postfix of the .so on linux?
         return res[1]
