@@ -583,10 +583,11 @@ class ProcessingPreset:
     #  @deprecated
     #
     ConvertToLeftHanded = (
-            ProcessingStep.MakeLeftHanded |
-            ProcessingStep.FlipUVs |
-            ProcessingStep.FlipWindingOrder |
-            0)
+        0
+        | ProcessingStep.MakeLeftHanded
+        | ProcessingStep.FlipUVs
+        | ProcessingStep.FlipWindingOrder
+    )
 
     # @def TargetRealtimeUse_Fast
     #  @brief Default postprocess configuration optimizing the data for real-time rendering.
@@ -602,13 +603,14 @@ class ProcessingPreset:
     #  use for you so it might be better to not specify them.
     #
     TargetRealtime_Fast = (
-            ProcessingStep.CalcTangentSpace |
-            ProcessingStep.GenNormals |
-            ProcessingStep.JoinIdenticalVertices |
-            ProcessingStep.Triangulate |
-            ProcessingStep.GenUVCoords |
-            ProcessingStep.SortByPType |
-            0)
+        0
+        | ProcessingStep.CalcTangentSpace
+        | ProcessingStep.GenNormals
+        | ProcessingStep.JoinIdenticalVertices
+        | ProcessingStep.Triangulate
+        | ProcessingStep.GenUVCoords
+        | ProcessingStep.SortByPType
+    )
 
     # @def TargetRealtime_Quality
     #  @brief Default postprocess configuration optimizing the data for real-time rendering.
@@ -626,19 +628,20 @@ class ProcessingPreset:
     #  of use for you so it might be better to not specify them.
     #
     TargetRealtime_Quality = (
-            ProcessingStep.CalcTangentSpace |
-            ProcessingStep.GenSmoothNormals |
-            ProcessingStep.JoinIdenticalVertices |
-            ProcessingStep.ImproveCacheLocality |
-            ProcessingStep.LimitBoneWeights |
-            ProcessingStep.RemoveRedundantMaterials |
-            ProcessingStep.SplitLargeMeshes |
-            ProcessingStep.Triangulate |
-            ProcessingStep.GenUVCoords |
-            ProcessingStep.SortByPType |
-            ProcessingStep.FindDegenerates |
-            ProcessingStep.FindInvalidData |
-            0)
+        0
+        | ProcessingStep.CalcTangentSpace
+        | ProcessingStep.GenSmoothNormals
+        | ProcessingStep.JoinIdenticalVertices
+        | ProcessingStep.ImproveCacheLocality
+        | ProcessingStep.LimitBoneWeights
+        | ProcessingStep.RemoveRedundantMaterials
+        | ProcessingStep.SplitLargeMeshes
+        | ProcessingStep.Triangulate
+        | ProcessingStep.GenUVCoords
+        | ProcessingStep.SortByPType
+        | ProcessingStep.FindDegenerates
+        | ProcessingStep.FindInvalidData
+    )
 
     # @def TargetRealtime_MaxQuality
     #  @brief Default postprocess configuration optimizing the data for real-time rendering.
@@ -655,8 +658,9 @@ class ProcessingPreset:
     #  of use for you so it might be better to not specify them.
     #
     TargetRealtime_MaxQuality = (
-            TargetRealtime_Quality |
-            ProcessingStep.FindInstances |
-            ProcessingStep.ValidateDataStructure |
-            ProcessingStep.OptimizeMeshes |
-            0)
+        0
+        | TargetRealtime_Quality
+        | ProcessingStep.FindInstances
+        | ProcessingStep.ValidateDataStructure
+        | ProcessingStep.OptimizeMeshes
+    )
