@@ -133,7 +133,7 @@ def search_library():
 
     candidates = []
     # test every file
-    for curfolder in [folder]+additional_dirs:
+    for curfolder in [folder] + additional_dirs:
         if os.path.isdir(curfolder):
             for filename in os.listdir(curfolder):
                 # our minimum requirement for candidates is that

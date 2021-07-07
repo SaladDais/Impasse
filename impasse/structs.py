@@ -187,7 +187,7 @@ class String(SerializableStruct):
 
 C_SRC += """
 // See 'MaterialSystem.cpp' for details.
-// 
+//
 // The size of length is truncated to 4 bytes on 64-bit platforms when used as a
 // material property (see MaterialSystem.cpp aiMaterial::AddProperty() for details).
 struct aiMaterialPropertyString {
@@ -1494,7 +1494,7 @@ class Animation(SerializableStruct):
 
 C_SRC += """
 // See 'cexport.h' for details.
-// 
+//
 // Note that the '_fields_' definition is outside the class to allow the 'next' field to be recursive
 struct aiExportDataBlob {
     unsigned long size;

@@ -193,12 +193,12 @@ def print_code():
         struct_cls_name = struct_data.name
         fields_type_data = struct_data.fields
         print("C_SRC += \"\"\"")
-        escaped_doc = struct_data.doc.replace('\n', '\n// ')
-        print(f"// {escaped_doc}")
+        for doc_line in struct_data.doc.splitlines(keepends=False):
+            print(f"// {doc_line}".rstrip())
         print(f"struct ai{struct_cls_name} {{")
         for field in fields_type_data.values():
             print(f"    {field.full_sig};")
-        print(f"}};")
+        print("};")
         print("\"\"\"\n\n")
         base_wrapper_cls = "SerializableStruct"
         if struct_cls_name in TUPLE_STRUCTS:
@@ -293,10 +293,10 @@ def print_code():
                 type_sig = f"Sequence[{type_sig}]"
                 accessor = f"VertexPropSequenceAccessor({field_name!r}, {type_data.array_len}, {adapter_name})"
             elif struct_cls_name == "MaterialProperty" and field_name == "mData":
-                type_sig = f"Any"
+                type_sig = "Any"
                 accessor = "MaterialPropertyDataAccessor()"
             elif struct_cls_name == "MetadataEntry" and field_name == "mData":
-                type_sig = f"Any"
+                type_sig = "Any"
                 accessor = "MetadataEntryDataAccessor()"
             elif struct_cls_name == "ExportDataBlob" and field_name == "data":
                 type_sig = "Union[bytearray]"
