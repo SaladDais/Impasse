@@ -82,9 +82,6 @@ def main(filename=None):
         for key, value in scene.metadata.as_mapping().items():
             print("    %s: %s" % (key, value))
 
-    # Finally release the model
-    impasse.release_import(scene)
-
 
 def usage():
     print("Usage: sample.py <3d model>")

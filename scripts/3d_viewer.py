@@ -23,8 +23,6 @@ from typing import Optional, Union
 import math
 import random
 
-from impasse import ImportedScene
-from impasse.core import CopiedScene, release_import, release_scene_copy
 from impasse.helper import get_bounding_box
 
 logger = logging.getLogger("impasse")
@@ -476,8 +474,7 @@ class Impasse3DViewer:
             self.set_shaders_v120()
             self.prepare_shaders()
 
-        self.inner_scene: Optional[ImportedScene] = None
-        self.scene: Optional[CopiedScene] = None
+        self.scene: Optional[Scene] = None
         self.mesh_gl_state = {}  # stores the OpenGL vertex/faces/normals buffers pointers
 
         self.node2colorid = {}  # stores a color ID for each node. Useful for mouse picking and visibility checking
@@ -673,14 +670,10 @@ class Impasse3DViewer:
 
     def load_model(self, path, postprocess=ProcessingPreset.TargetRealtime_MaxQuality):
         logger.info("Loading model:" + path + "...")
-        self.cleanup_scene()
+        kwargs = {}
         if postprocess:
-            scene = impasse.load(path, processing=postprocess)
-        else:
-            scene = impasse.load(path)
-        self.inner_scene = scene
-        # Need a mutable copy of the scene
-        self.scene = scene.copy()
+            kwargs['processing'] = postprocess
+        self.scene = impasse.load(path, **kwargs).copy_mutable()
         logger.info("Done.")
 
         scene = self.scene
@@ -700,14 +693,6 @@ class Impasse3DViewer:
 
         # Finally release the model
         logger.info("Ready for 3D rendering!")
-
-    def cleanup_scene(self):
-        if self.scene:
-            release_scene_copy(self.scene)
-            self.scene = None
-        if self.inner_scene:
-            release_import(self.inner_scene)
-            self.inner_scene = None
 
     def cycle_cameras(self):
 
@@ -1283,7 +1268,6 @@ def main(model, width, height):
 
         # Make sure we do not go over 30fps
         clock.tick(30)
-    app.cleanup_scene()
     logger.info("Quitting! Bye bye!")
 
 
