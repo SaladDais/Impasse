@@ -247,7 +247,7 @@ def print_code():
             num_elem_field = None
             accessor = None
             if type_data.array_len:
-                type_sig = f"Sequence[{type_sig}]"
+                type_sig = f"BaseSequence[{type_sig}]"
                 accessor = f"StaticSequenceAccessor({field_name!r}, {type_data.array_len}, {adapter_name})"
             elif "mNum" + type_data.base_name in fields_type_data:
                 num_elem_field = "mNum" + type_data.base_name
@@ -272,7 +272,7 @@ def print_code():
                 adapter_name = "MaterialIndexAdapter"
 
             if num_elem_field:
-                type_sig = f"Sequence[{type_sig}]"
+                type_sig = f"BaseSequence[{type_sig}]"
                 accessor = f"DynamicSequenceAccessor({field_name!r}, {num_elem_field!r}, {adapter_name})"
             elif type_data.pointer_type:
                 type_sig = f"Optional[{type_sig}]"

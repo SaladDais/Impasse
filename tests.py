@@ -2,6 +2,8 @@ import os.path
 import tempfile
 import unittest
 
+import numpy
+
 import impasse
 from impasse.constants import TextureSemantic
 
@@ -86,6 +88,26 @@ class ImpasseTests(unittest.TestCase):
             self.assertIsNotNone(collada)
             material_map = collada.meshes[0].material.as_mapping()
             self.assertEqual(material_map["?mat.name"], "RedPlastic")
+
+    def test_mesh_numpy_properties(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            self.assertListEqual([-400.0, 0.0, -200.0], list(scene.meshes[0].vertices[0]))
+
+    def test_mutating_mesh_numpy_properties(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            with scene.copy() as scene_copy:
+                verts_copy: numpy.ndarray = scene.meshes[0].vertices[0].copy()
+                verts_copy[1] = 40.0
+                scene_copy.meshes[0].vertices[0] = verts_copy
+                # Check that we actually mutated the underlying data
+                self.assertEqual(40.0, scene_copy.meshes[0].vertices[0][1])
+
+    def test_mutating_mesh_numpy_array(self):
+        with impasse.load(TEST_COLLADA) as scene:
+            with scene.copy() as scene_copy:
+                scene_copy.meshes[0].vertices[0][1] = 40.0
+                # Check that we actually mutated the underlying data
+                self.assertEqual(40.0, scene_copy.meshes[0].vertices[0][1])
 
 
 if __name__ == "__main__":

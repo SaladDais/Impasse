@@ -175,7 +175,7 @@ class String(SerializableStruct):
      the number of bytes from the beginning of the string to its end.
     """
 
-    data: Sequence[int] = StaticSequenceAccessor('data', 1024, None)
+    data: BaseSequence[int] = StaticSequenceAccessor('data', 1024, None)
     """String buffer. Size limit is MAXLEN"""
 
 
@@ -202,7 +202,7 @@ class MaterialPropertyString(SerializableStruct):
      the number of bytes from the beginning of the string to its end.
     """
 
-    data: Sequence[int] = StaticSequenceAccessor('data', 1024, None)
+    data: BaseSequence[int] = StaticSequenceAccessor('data', 1024, None)
     """String buffer. Size limit is MAXLEN"""
 
 
@@ -288,7 +288,7 @@ class Face(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiFace"
 
-    indices: Sequence[int] = DynamicSequenceAccessor('mIndices', 'mNumIndices', None)
+    indices: BaseSequence[int] = DynamicSequenceAccessor('mIndices', 'mNumIndices', None)
     """ Pointer to the indices array. Size of the array is given in numIndices."""
 
 
@@ -446,13 +446,13 @@ class Metadata(SerializableStruct):
     num_properties: int = SimpleAccessor(name='mNumProperties')
     """Length of the mKeys and mValues arrays, respectively"""
 
-    keys: Sequence[str] = DynamicSequenceAccessor('mKeys', 'mNumProperties', StringAdapter)
+    keys: BaseSequence[str] = DynamicSequenceAccessor('mKeys', 'mNumProperties', StringAdapter)
     """
     Arrays of keys, may not be NULL. Entries in this array may not be NULL
     as well.
     """
 
-    values: Sequence[MetadataEntry] = DynamicSequenceAccessor('mValues', 'mNumProperties', MetadataEntry)
+    values: BaseSequence[MetadataEntry] = DynamicSequenceAccessor('mValues', 'mNumProperties', MetadataEntry)
     """
     Arrays of values, may not be NULL. Entries in this array may be NULL
     if the corresponding property key has no assigned value.
@@ -504,10 +504,10 @@ class Node(SerializableStruct):
     parent: Optional['Node'] = SimpleAccessor(name='mParent', adapter=LazyStruct(lambda: Node))
     """Parent node. NULL if this node is the root node."""
 
-    children: Sequence['Node'] = DynamicSequenceAccessor('mChildren', 'mNumChildren', LazyStruct(lambda: Node))
+    children: BaseSequence['Node'] = DynamicSequenceAccessor('mChildren', 'mNumChildren', LazyStruct(lambda: Node))
     """The child nodes of this node. NULL if mNumChildren is 0."""
 
-    meshes: Sequence[Mesh] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', MeshIndexAdapter)
+    meshes: BaseSequence[Mesh] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', MeshIndexAdapter)
     """The meshes of this node. Each entry is an index into the mesh"""
 
     metadata: Optional[Metadata] = SimpleAccessor(name='mMetadata', adapter=Metadata)
@@ -878,7 +878,7 @@ class Material(SerializableStruct):
     __slots__ = ()
     C_TYPE = "struct aiMaterial"
 
-    properties: Sequence[MaterialProperty] = DynamicSequenceAccessor('mProperties', 'mNumProperties', MaterialProperty)
+    properties: BaseSequence[MaterialProperty] = DynamicSequenceAccessor('mProperties', 'mNumProperties', MaterialProperty)
     """List of all material properties loaded."""
 
     num_allocated: int = SimpleAccessor(name='mNumAllocated')
@@ -906,7 +906,7 @@ class Bone(SerializableStruct):
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
     """ The name of the bone."""
 
-    weights: Sequence[VertexWeight] = DynamicSequenceAccessor('mWeights', 'mNumWeights', VertexWeight)
+    weights: BaseSequence[VertexWeight] = DynamicSequenceAccessor('mWeights', 'mNumWeights', VertexWeight)
     """ The vertices affected by this bone"""
 
     offset_matrix: numpy.ndarray = SimpleAccessor(name='mOffsetMatrix', adapter=Matrix4x4)
@@ -939,7 +939,7 @@ class AnimMesh(SerializableStruct):
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
     """ Anim Mesh name"""
 
-    vertices: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mVertices', 'mNumVertices', Vector3D)
+    vertices: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mVertices', 'mNumVertices', Vector3D)
     """
     Replacement for aiMesh::mVertices. If this array is non-NULL,
     it *must* contain mNumVertices entries. The corresponding
@@ -949,19 +949,19 @@ class AnimMesh(SerializableStruct):
     array is not, the source data is taken instead)
     """
 
-    normals: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mNormals', 'mNumVertices', Vector3D)
+    normals: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mNormals', 'mNumVertices', Vector3D)
     """Replacement for aiMesh::mNormals."""
 
-    tangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mTangents', 'mNumVertices', Vector3D)
+    tangents: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mTangents', 'mNumVertices', Vector3D)
     """Replacement for aiMesh::mTangents."""
 
-    bitangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mBitangents', 'mNumVertices', Vector3D)
+    bitangents: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mBitangents', 'mNumVertices', Vector3D)
     """Replacement for aiMesh::mBitangents."""
 
-    colors: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mColors', 8, Color4D)
+    colors: Sequence[Optional[BaseSequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mColors', 8, Color4D)
     """Replacement for aiMesh::mColors"""
 
-    texture_coords: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mTextureCoords', 8, Vector3D)
+    texture_coords: Sequence[Optional[BaseSequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mTextureCoords', 8, Vector3D)
     """Replacement for aiMesh::mTextureCoords"""
 
     weight: float = SimpleAccessor(name='mWeight')
@@ -1008,14 +1008,14 @@ class Mesh(SerializableStruct):
     output meshes consist of one primitive type each.
     """
 
-    vertices: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mVertices', 'mNumVertices', Vector3D)
+    vertices: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mVertices', 'mNumVertices', Vector3D)
     """
     Vertex positions.
     This array is always present in a mesh. The array is
     mNumVertices in size.
     """
 
-    normals: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mNormals', 'mNumVertices', Vector3D)
+    normals: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mNormals', 'mNumVertices', Vector3D)
     """
     Vertex normals.
     The array contains normalized vectors, NULL if not present.
@@ -1038,7 +1038,7 @@ class Mesh(SerializableStruct):
       directly from the model file.
     """
 
-    tangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mTangents', 'mNumVertices', Vector3D)
+    tangents: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mTangents', 'mNumVertices', Vector3D)
     """
     Vertex tangents.
     The tangent of a vertex points in the direction of the positive
@@ -1055,7 +1055,7 @@ class Mesh(SerializableStruct):
     tangent and normal vectors).
     """
 
-    bitangents: Sequence[numpy.ndarray] = DynamicSequenceAccessor('mBitangents', 'mNumVertices', Vector3D)
+    bitangents: BaseSequence[numpy.ndarray] = DynamicSequenceAccessor('mBitangents', 'mNumVertices', Vector3D)
     """
     Vertex bitangents.
     The bitangent of a vertex points in the direction of the positive
@@ -1065,7 +1065,7 @@ class Mesh(SerializableStruct):
     bitangents.
     """
 
-    colors: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mColors', 8, Color4D)
+    colors: Sequence[Optional[BaseSequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mColors', 8, Color4D)
     """
     Vertex color sets.
     A mesh may contain 0 to
@@ -1074,14 +1074,14 @@ class Mesh(SerializableStruct):
     mNumVertices in size if present.
     """
 
-    texture_coords: Sequence[Optional[Sequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mTextureCoords', 8, Vector3D)
+    texture_coords: Sequence[Optional[BaseSequence[numpy.ndarray]]] = VertexPropSequenceAccessor('mTextureCoords', 8, Vector3D)
     """
     Vertex texture coords, also known as UV channels.
     A mesh may contain 0 to AI_MAX_NUMBER_OF_TEXTURECOORDS per
     vertex. NULL if not present. The array is mNumVertices in size.
     """
 
-    num_uv_components: Sequence[int] = StaticSequenceAccessor('mNumUVComponents', 8, None)
+    num_uv_components: BaseSequence[int] = StaticSequenceAccessor('mNumUVComponents', 8, None)
     """
     Specifies the number of components for a given UV channel.
     Up to three channels are supported (UVW, for accessing volume
@@ -1091,7 +1091,7 @@ class Mesh(SerializableStruct):
     @note 4D coords are not supported
     """
 
-    faces: Sequence[Face] = DynamicSequenceAccessor('mFaces', 'mNumFaces', Face)
+    faces: BaseSequence[Face] = DynamicSequenceAccessor('mFaces', 'mNumFaces', Face)
     """
     The faces the mesh is constructed from.
     Each face refers to a number of vertices by their indices.
@@ -1101,7 +1101,7 @@ class Mesh(SerializableStruct):
     is NOT set each face references an unique set of vertices.
     """
 
-    bones: Sequence[Bone] = DynamicSequenceAccessor('mBones', 'mNumBones', Bone)
+    bones: BaseSequence[Bone] = DynamicSequenceAccessor('mBones', 'mNumBones', Bone)
     """
     The bones of this mesh.
     A bone consists of a name by which it can be found in the
@@ -1130,7 +1130,7 @@ class Mesh(SerializableStruct):
       - Vertex animations refer to meshes by their names.
     """
 
-    anim_meshes: Sequence[AnimMesh] = DynamicSequenceAccessor('mAnimMeshes', 'mNumAnimMeshes', AnimMesh)
+    anim_meshes: BaseSequence[AnimMesh] = DynamicSequenceAccessor('mAnimMeshes', 'mNumAnimMeshes', AnimMesh)
     """
     Attachment meshes for this mesh, for vertex-based animation.
     Attachment meshes carry replacement data for some of the
@@ -1328,7 +1328,7 @@ class NodeAnim(SerializableStruct):
      must exist and it must be unique.
     """
 
-    position_keys: Sequence[VectorKey] = DynamicSequenceAccessor('mPositionKeys', 'mNumPositionKeys', VectorKey)
+    position_keys: BaseSequence[VectorKey] = DynamicSequenceAccessor('mPositionKeys', 'mNumPositionKeys', VectorKey)
     """
     The position keys of this animation channel. Positions are
     specified as 3D vector. The array is mNumPositionKeys in size.
@@ -1336,7 +1336,7 @@ class NodeAnim(SerializableStruct):
     scaling and one rotation key.
     """
 
-    rotation_keys: Sequence[QuatKey] = DynamicSequenceAccessor('mRotationKeys', 'mNumRotationKeys', QuatKey)
+    rotation_keys: BaseSequence[QuatKey] = DynamicSequenceAccessor('mRotationKeys', 'mNumRotationKeys', QuatKey)
     """
     The rotation keys of this animation channel. Rotations are
      given as quaternions,  which are 4D vectors. The array is
@@ -1345,7 +1345,7 @@ class NodeAnim(SerializableStruct):
     scaling and one position key.
     """
 
-    scaling_keys: Sequence[VectorKey] = DynamicSequenceAccessor('mScalingKeys', 'mNumScalingKeys', VectorKey)
+    scaling_keys: BaseSequence[VectorKey] = DynamicSequenceAccessor('mScalingKeys', 'mNumScalingKeys', VectorKey)
     """
     The scaling keys of this animation channel. Scalings are
      specified as 3D vector. The array is mNumScalingKeys in size.
@@ -1392,7 +1392,7 @@ class MeshAnim(SerializableStruct):
      of meshes with similar animation setup)
     """
 
-    keys: Sequence[MeshKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshKey)
+    keys: BaseSequence[MeshKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshKey)
     """Key frames of the animation. May not be NULL."""
 
     def __repr__(self):
@@ -1421,7 +1421,7 @@ class MeshMorphAnim(SerializableStruct):
     of meshes with similar animation setup)
     """
 
-    keys: Sequence[MeshMorphKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshMorphKey)
+    keys: BaseSequence[MeshMorphKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshMorphKey)
     """Key frames of the animation. May not be NULL."""
 
     def __repr__(self):
@@ -1461,19 +1461,19 @@ class Animation(SerializableStruct):
     ticks_per_second: float = SimpleAccessor(name='mTicksPerSecond')
     """Ticks per second. 0 if not specified in the imported file"""
 
-    channels: Sequence[NodeAnim] = DynamicSequenceAccessor('mChannels', 'mNumChannels', NodeAnim)
+    channels: BaseSequence[NodeAnim] = DynamicSequenceAccessor('mChannels', 'mNumChannels', NodeAnim)
     """
     The node animation channels. Each channel affects a single node.
      The array is mNumChannels in size.
     """
 
-    mesh_channels: Sequence[MeshAnim] = DynamicSequenceAccessor('mMeshChannels', 'mNumMeshChannels', MeshAnim)
+    mesh_channels: BaseSequence[MeshAnim] = DynamicSequenceAccessor('mMeshChannels', 'mNumMeshChannels', MeshAnim)
     """
     The mesh animation channels. Each channel affects a single mesh.
      The array is mNumMeshChannels in size.
     """
 
-    morph_mesh_channels: Sequence[MeshMorphAnim] = DynamicSequenceAccessor('mMorphMeshChannels', 'mNumMorphMeshChannels', MeshMorphAnim)
+    morph_mesh_channels: BaseSequence[MeshMorphAnim] = DynamicSequenceAccessor('mMorphMeshChannels', 'mNumMorphMeshChannels', MeshMorphAnim)
     """
     The morph mesh animation channels. Each channel affects a single mesh.
     The array is mNumMorphMeshChannels in size.
@@ -1569,7 +1569,7 @@ class Scene(SerializableStruct):
     of the imported file.
     """
 
-    meshes: Sequence[Mesh] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', Mesh)
+    meshes: BaseSequence[Mesh] = DynamicSequenceAccessor('mMeshes', 'mNumMeshes', Mesh)
     """
     The array of meshes.
     Use the indices given in the aiNode structure to access
@@ -1578,7 +1578,7 @@ class Scene(SerializableStruct):
     be at least ONE material.
     """
 
-    materials: Sequence[Material] = DynamicSequenceAccessor('mMaterials', 'mNumMaterials', Material)
+    materials: BaseSequence[Material] = DynamicSequenceAccessor('mMaterials', 'mNumMaterials', Material)
     """
     The array of materials.
     Use the index given in each aiMesh structure to access this
@@ -1587,14 +1587,14 @@ class Scene(SerializableStruct):
     be at least ONE material.
     """
 
-    animations: Sequence[Animation] = DynamicSequenceAccessor('mAnimations', 'mNumAnimations', Animation)
+    animations: BaseSequence[Animation] = DynamicSequenceAccessor('mAnimations', 'mNumAnimations', Animation)
     """
     The array of animations.
     All animations imported from the given file are listed here.
     The array is mNumAnimations in size.
     """
 
-    textures: Sequence[Texture] = DynamicSequenceAccessor('mTextures', 'mNumTextures', Texture)
+    textures: BaseSequence[Texture] = DynamicSequenceAccessor('mTextures', 'mNumTextures', Texture)
     """
     The array of embedded textures.
     Not many file formats embed their textures into the file.
@@ -1602,14 +1602,14 @@ class Scene(SerializableStruct):
     some GameStudio versions)
     """
 
-    lights: Sequence[Light] = DynamicSequenceAccessor('mLights', 'mNumLights', Light)
+    lights: BaseSequence[Light] = DynamicSequenceAccessor('mLights', 'mNumLights', Light)
     """
     The array of light sources.
     All light sources imported from the given file are
     listed here. The array is mNumLights in size.
     """
 
-    cameras: Sequence[Camera] = DynamicSequenceAccessor('mCameras', 'mNumCameras', Camera)
+    cameras: BaseSequence[Camera] = DynamicSequenceAccessor('mCameras', 'mNumCameras', Camera)
     """
     The array of cameras.
     All cameras imported from the given file are listed here.
