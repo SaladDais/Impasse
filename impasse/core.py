@@ -6,7 +6,7 @@ This is the main-module of Impasse.
 from __future__ import annotations
 
 import sys
-from typing import Optional, Union, BinaryIO
+from typing import Optional, Union, BinaryIO, List
 import logging
 
 from . import helper
@@ -25,47 +25,30 @@ _assimp_lib = helper.search_library()
 
 class ImportedScene(Scene):
     def __init__(self, struct_val):
-        super().__init__(struct_val)
+        # Will be released after the last reference to this Scene object dies
+        # If you want to force an early release you can just set `ImportedScene.struct = None`
+        # Since there are no other strong references to the actual struct.
+        super().__init__(ffi.gc(struct_val, _assimp_lib.aiReleaseImport))
         self._readonly = True
 
-    def copy(self) -> CopiedScene:
+    def copy_mutable(self) -> CopiedScene:
         copy_out = ffi.new("struct aiScene **")
         _assimp_lib.aiCopyScene(self.struct, copy_out)
         if not copy_out[0]:
             raise AssimpError("Unable to copy scene")
         return CopiedScene(copy_out[0])
 
-    def __enter__(self) -> ImportedScene:
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        # TODO: ffi.gc() instead?
-        release_import(self)
-
 
 class CopiedScene(Scene):
     def __init__(self, struct_val):
-        super().__init__(struct_val)
+        super().__init__(ffi.gc(struct_val, _assimp_lib.aiFreeScene))
         self._readonly = False
-
-    def __enter__(self) -> CopiedScene:
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        release_scene_copy(self)
 
 
 class OwnedExportDataBlob(ExportDataBlob):
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        release_export_blob(self)
-
-
-def release_import(scene: ImportedScene):
-    """Release resources of a loaded scene."""
-    _assimp_lib.aiReleaseImport(scene.struct)
+    """Export Data Blob that's owned by Python."""
+    def __init__(self, struct_val):
+        super().__init__(ffi.gc(struct_val, _assimp_lib.aiReleaseExportBlob))
 
 
 def load(
@@ -154,7 +137,7 @@ def export_blob(
     scene: Scene,
     file_type: str,
     processing=ProcessingStep.Triangulate
-) -> OwnedExportDataBlob:
+) -> List[ExportDataBlob]:
     """
     Export a scene and return a blob in the correct format. On failure throws AssimpError.
 
@@ -180,12 +163,16 @@ def export_blob(
 
     if not export_blob_ptr:
         raise AssimpError('Could not export scene to blob!')
-    return OwnedExportDataBlob(export_blob_ptr)
+    # TODO: assimp's API for blobs is a little funky. Rather than releasing blobs
+    #  invidually you only release the head of the list. That means we should
+    #  make sure the head doesn't die until the last child node has died.
+    #  Should maybe replace struct `scene` member with an `owner` member.
 
-
-def release_export_blob(blob: ExportDataBlob):
-    _assimp_lib.aiReleaseExportBlob(blob.struct)
-
-
-def release_scene_copy(scene: Scene):
-    _assimp_lib.aiFreeScene(scene.struct)
+    # Convert the linked list to a regular list
+    blob = OwnedExportDataBlob(export_blob_ptr)
+    blob_list = [blob]
+    blob = blob.next
+    while blob is not None:
+        blob_list.append(blob.next)
+        blob = blob.next
+    return blob_list

@@ -1,11 +1,9 @@
-from .core import load, export, export_blob, release_import, ImportedScene, CopiedScene, OwnedExportDataBlob
+from .core import load, export, export_blob, ImportedScene, CopiedScene
 
 __all__ = [
     'load',
     'export',
     'export_blob',
-    'release_import',
     'ImportedScene',
     'CopiedScene',
-    'OwnedExportDataBlob',
 ]

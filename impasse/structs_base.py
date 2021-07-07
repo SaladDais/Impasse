@@ -436,8 +436,8 @@ class MetadataEntryDataAccessor(SimpleAccessor[METADATA_VAL]):
         data = getattr(instance.struct, "mData")
         if meta_type in self._BASIC_TYPES:
             ffi.cast(self._BASIC_TYPES[meta_type], data)[0] = value
-        elif MetadataType == MetadataType.AISTRING:
-            return StringAdapter.to_c(ffi.cast("struct aiString*", data), value)
+        elif meta_type == MetadataType.AISTRING:
+            StringAdapter.to_c(ffi.cast("struct aiString*", data), value)
         else:
             raise NotImplementedError()
 
@@ -460,13 +460,22 @@ class MetadataMapping(Mapping[str, METADATA_VAL]):
                 return self._metadata.values[i].data
         raise KeyError(repr(item))
 
+    def __setitem__(self, item: str, value: METADATA_VAL):
+        for i, k in enumerate(self._metadata.keys):
+            if k == item:
+                self._metadata.values[i].data = value
+                return
+        raise KeyError(repr(item))
+
     def __repr__(self):
         return f"{self.__class__.__name__}<{dict(self)!r}>"
 
 
 # Materials-specific accessors and wrappers
+MATERIAL_PROP_VALUE = Union[numpy.ndarray, str, bytes, int, float]
 
-class MaterialPropertyDataAccessor(SimpleAccessor[Any]):
+
+class MaterialPropertyDataAccessor(SimpleAccessor[MATERIAL_PROP_VALUE]):
     __slots__ = ()
 
     ARRAY_ELEM_TYPES = {
@@ -475,11 +484,16 @@ class MaterialPropertyDataAccessor(SimpleAccessor[Any]):
         MaterialPropertyType.INT: (ffi.sizeof("int"), numpy.intc),
     }
 
-    def __get__(self, obj: MaterialProperty, owner=None) -> Union[numpy.ndarray, str, bytes]:
+    def __get__(self, obj: MaterialProperty, owner=None) -> MATERIAL_PROP_VALUE:
         buf = ffi.buffer(obj.struct.mData, obj.struct.mDataLength)
         if obj.struct.mType in self.ARRAY_ELEM_TYPES:
             elem_size, numpy_elem_type = self.ARRAY_ELEM_TYPES[obj.struct.mType]
-            arr = numpy.ndarray(buffer=buf, dtype=numpy_elem_type, shape=(len(buf) // elem_size,))
+            arr_size = len(buf) // elem_size
+            arr = numpy.ndarray(buffer=buf, dtype=numpy_elem_type, shape=(arr_size,))
+            # There are only _arrays_ of floats and ints, unwrap single-element arrays
+            # Since their array-ness isn't likely semantically significant.
+            if arr_size == 1:
+                return arr[0]
             arr.flags.writeable = not obj.readonly
             return arr
         elif obj.struct.mType == MaterialPropertyType.AISTRING:
@@ -489,16 +503,36 @@ class MaterialPropertyDataAccessor(SimpleAccessor[Any]):
         else:
             raise ValueError(f"Unknown material property type {obj.struct.mType}")
 
-    def __set__(self, instance, value):
-        raise NotImplementedError()
+    def __set__(self, obj: MaterialProperty, value: MATERIAL_PROP_VALUE):
+        if obj.readonly:
+            raise AttributeError("Trying to write to readonly material")
+
+        buf = ffi.buffer(obj.struct.mData, obj.struct.mDataLength)
+        if obj.struct.mType in self.ARRAY_ELEM_TYPES:
+            if isinstance(value, (float, int)):
+                value = [value]
+            elem_size, numpy_elem_type = self.ARRAY_ELEM_TYPES[obj.struct.mType]
+            arr_size = len(buf) // elem_size
+            if len(value) != arr_size:
+                raise ValueError(f"Expected array length mismatch, {len(value)} != {arr_size}")
+            arr = numpy.array(value, dtype=numpy_elem_type)
+            buf[:] = arr.flatten().data
+            return arr
+        elif obj.struct.mType == MaterialPropertyType.AISTRING:
+            StringAdapter.to_c(ffi.cast("struct aiMaterialPropertyString *", obj.struct.mData), value)
+        elif obj.struct.mType == MaterialPropertyType.BINARY:
+            # Will error if not the same length as the existing data
+            # Seems like this type is mostly used for ints anyway.
+            buf[:] = value
+        else:
+            raise ValueError(f"Unknown material property type {obj.struct.mType}")
 
 
 REAL_PROPERTY_KEY = Tuple[str, Union[TextureSemantic, int]]
 PROPERTY_KEY = Union[str, REAL_PROPERTY_KEY]
-PROPERTY_VAL = Union[numpy.ndarray, str, bytes]
 
 
-class MaterialMapping(Mapping[PROPERTY_KEY, PROPERTY_VAL]):
+class MaterialMapping(Mapping[PROPERTY_KEY, MATERIAL_PROP_VALUE]):
     __slots__ = ("_material",)
 
     def __init__(self, material: Material):
@@ -510,14 +544,21 @@ class MaterialMapping(Mapping[PROPERTY_KEY, PROPERTY_VAL]):
     def __iter__(self) -> Iterator[REAL_PROPERTY_KEY]:
         return iter(((p.key, p.semantic) for p in self._material.properties))
 
-    def __getitem__(self, item: PROPERTY_KEY) -> PROPERTY_VAL:
-        semantic = TextureSemantic.NONE
-        if not isinstance(item, str):
-            item, semantic = item
+    def _get_prop(self, key: PROPERTY_KEY) -> MaterialProperty:
+        if isinstance(key, str):
+            item, semantic = key, TextureSemantic.NONE
+        else:
+            item, semantic = key
         for prop in self._material.properties:
             if prop.semantic == semantic and prop.key == item:
-                return prop.data
+                return prop
         raise KeyError(repr((item, semantic)))
+
+    def __getitem__(self, item: PROPERTY_KEY) -> MATERIAL_PROP_VALUE:
+        return self._get_prop(item).data
+
+    def __setitem__(self, item: PROPERTY_KEY, value: MATERIAL_PROP_VALUE):
+        self._get_prop(item).data = value
 
     def __repr__(self):
         return f"{self.__class__.__name__}<{dict(self)!r}>"
