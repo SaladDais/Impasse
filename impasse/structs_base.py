@@ -21,12 +21,12 @@ class CSerializableBase(abc.ABC):
     @classmethod
     @abc.abstractmethod
     def from_c(cls, val, scene: Optional[Scene] = None):
-        pass
+        raise NotImplementedError()
 
     @classmethod
     @abc.abstractmethod
     def to_c(cls, instance, val):
-        pass
+        raise NotImplementedError()
 
 
 class IdentityAdapter(CSerializableBase):
@@ -229,11 +229,19 @@ class BaseSequence(Sequence[_T], abc.ABC):
 
     def __getitem__(self, i: Union[slice, int]) -> Union[_T, List[_T]]:
         if isinstance(i, int):
-            if i < len(self):
-                val = self.elems_ptr[i]
-                return self.elem_adapter.from_c(val, self._scene)
-            raise IndexError(f"{i} is out of range")
+            if 0 > i or i >= len(self):
+                raise IndexError(f"{i} is out of range")
+            val = self.elems_ptr[i]
+            return self.elem_adapter.from_c(val, self._scene)
         return [self[idx] for idx in range(*i.indices(len(self)))]
+
+    def __setitem__(self, key: int, value: _T):
+        if self._scene is not None and self._scene.readonly:
+            raise KeyError("Refusing to write to Sequence belonging to readonly scene")
+        if 0 > key or key >= len(self):
+            raise IndexError(f"{key} is out of range")
+        elem_addr = ffi.addressof(self.elems_ptr, key)
+        self.elem_adapter.to_c(elem_addr, value)
 
     def __repr__(self):
         return f"{self.__class__.__name__}<{tuple(self)!r}>"
