@@ -186,7 +186,7 @@ def scan_structs():
 
 
 def print_code():
-    print("from .structs_base import *\n\nC_SRC = \"\"\n\n")
+    print("from __future__ import annotations\n\nfrom .structs_base import *\n\nC_SRC = \"\"\n\n")
 
     for struct_data in scan_structs():
         struct_cls_name = struct_data.name
@@ -212,6 +212,7 @@ def print_code():
         print("")
         had_comment = False
         for field_name, type_data in fields_type_data.items():
+            python_name = type_data.python_name
             if field_name.startswith("mNum"):
                 if "m" + type_data.base_name[3:] in fields_type_data:
                     # A count field that seems to have a directly associated collection
@@ -223,7 +224,7 @@ def print_code():
                 had_comment = False
             # Pythonize the field names
             call_spec = ""
-            if type_data.python_name != type_data.name:
+            if python_name != type_data.name:
                 call_spec = f"name={field_name!r}"
             type_sig = "Any"
             accessor_name = "SimpleAccessor"
@@ -256,6 +257,19 @@ def print_code():
                 if field_name in ("mKeys", "mValues"):
                     num_elem_field = "mNumProperties"
 
+            if struct_cls_name == "Node" and field_name == "mMeshes":
+                # Will get picked up by the sequence type sig rewriter later
+                type_sig = "Mesh"
+                adapter_name = "MeshIndexAdapter"
+            elif struct_cls_name == "MaterialProperty" and field_name == "mIndex":
+                python_name = "texture"
+                type_sig = "Optional[Texture]"
+                adapter_name = "TextureIndexAdapter"
+            elif struct_cls_name == "Mesh" and field_name == "mMaterialIndex":
+                python_name = "material"
+                type_sig = "Material"
+                adapter_name = "MaterialIndexAdapter"
+
             if num_elem_field:
                 type_sig = f"Sequence[{type_sig}]"
                 accessor = f"DynamicSequenceAccessor({field_name!r}, {num_elem_field!r}, {adapter_name})"
@@ -282,14 +296,14 @@ def print_code():
             elif struct_cls_name == "ExportDataBlob" and field_name == "data":
                 type_sig = "Union[bytearray]"
                 accessor = "BoundedBufferAccessor('data', 'size')"
-            elif type_data.full_sig.startswith("struct "):
+            elif type_data.full_sig.startswith("struct ") or adapter_name != "None":
                 if call_spec:
                     call_spec += ", "
                 call_spec += f"adapter={adapter_name}"
 
             if accessor is None:
                 accessor = f"{accessor_name}({call_spec})"
-            print(f"    {type_data.python_name}: {type_sig} = {accessor}")
+            print(f"    {python_name}: {type_sig} = {accessor}")
 
             # Docstrings must _follow_ the attribute.
             comment_lines = type_data.comments

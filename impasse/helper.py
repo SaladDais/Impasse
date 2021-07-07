@@ -37,8 +37,7 @@ def get_bounding_box(scene: Scene):
 def get_bounding_box_for_node(scene: Scene, node: Node, bb_min, bb_max, transformation):
     transformation = numpy.dot(transformation, node.transformation)
 
-    for mesh_idx in node.meshes:
-        mesh = scene.meshes[mesh_idx]
+    for mesh in node.meshes:
         for v in mesh.vertices:
             v = transform(v, transformation)
             bb_min[0] = min(bb_min[0], v[0])

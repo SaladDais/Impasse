@@ -478,7 +478,7 @@ class Impasse3DViewer:
 
         self.inner_scene: Optional[ImportedScene] = None
         self.scene: Optional[CopiedScene] = None
-        self.meshes = {}  # stores the OpenGL vertex/faces/normals buffers pointers
+        self.mesh_gl_state = {}  # stores the OpenGL vertex/faces/normals buffers pointers
 
         self.node2colorid = {}  # stores a color ID for each node. Useful for mouse picking and visibility checking
         self.colorid2node = {}  # reverse dict of node2colorid
@@ -694,7 +694,7 @@ class Impasse3DViewer:
         self.scene_center = [(a + b) / 2. for a, b in zip(self.bb_min, self.bb_max)]
 
         for index, mesh in enumerate(scene.meshes):
-            self.meshes[index] = self.prepare_gl_buffers(mesh)
+            self.mesh_gl_state[index] = self.prepare_gl_buffers(mesh)
 
         self.glize(scene, scene.root_node)
 
@@ -989,8 +989,8 @@ class Impasse3DViewer:
         ###
         if isinstance(node, Node):
 
-            for mesh_idx in node.meshes:
-                mesh = self.scene.meshes[mesh_idx]
+            for mesh in node.meshes:
+                mesh_index = self.scene.meshes.index(mesh)
                 stride = 24  # 6 * 4 bytes
 
                 if node == self.currently_selected and mode == SILHOUETTE:
@@ -1009,7 +1009,7 @@ class Impasse3DViewer:
                         if node == self.currently_selected:
                             diffuse = [1.0, 0.0, 0.0, 1.0]  # selected nodes in red
                         else:
-                            material = self.scene.materials[mesh.material_index]
+                            material = mesh.material
                             diffuse = list(material.as_mapping()["$clr.diffuse"])
                         if len(diffuse) == 3:  # RGB instead of expected RGBA
                             diffuse.append(1.0)
@@ -1023,7 +1023,7 @@ class Impasse3DViewer:
 
                 glUniformMatrix4fv(shader.u_modelMatrix, 1, GL_TRUE, m)
 
-                mesh_gl = self.meshes[mesh_idx]
+                mesh_gl = self.mesh_gl_state[mesh_index]
                 vbo = mesh_gl["vbo"]
                 vbo.bind()
 
