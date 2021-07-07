@@ -115,6 +115,7 @@ class CStrAdapter(CSerializableBase):
 class NumPyStruct(SerializableStruct):
     SHAPE: ClassVar[Tuple[int, ...]]
     DTYPE: ClassVar[numpy.dtype]
+    NUM_ELEMS: int
 
     @classmethod
     def get_size(cls):
@@ -135,8 +136,8 @@ class NumPyStruct(SerializableStruct):
 
         if val.dtype != cls.DTYPE:
             raise ValueError(f"{val.dtype} != {cls.DTYPE}")
-        if val.size != math.prod(cls.SHAPE):
-            raise ValueError(f"{val.size} != {math.prod(cls.SHAPE)}")
+        if val.size != cls.NUM_ELEMS:
+            raise ValueError(f"{val.size} != {cls.NUM_ELEMS}")
         ffi.buffer(instance, cls.get_size())[:] = val.flatten().data
 
     @classmethod

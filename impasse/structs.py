@@ -21,6 +21,7 @@ class Vector2D(NumPyStruct):
     C_TYPE = "struct aiVector2D"
     SHAPE = (2,)
     DTYPE = numpy.single
+    NUM_ELEMS = 2
 
     x: float = SimpleAccessor()
     y: float = SimpleAccessor()
@@ -47,6 +48,7 @@ class Matrix3x3(NumPyStruct):
     C_TYPE = "struct aiMatrix3x3"
     SHAPE = (3, 3)
     DTYPE = numpy.single
+    NUM_ELEMS = 9
 
     a1: float = SimpleAccessor()
     a2: float = SimpleAccessor()
@@ -75,6 +77,7 @@ class Texel(NumPyStruct):
     C_TYPE = "struct aiTexel"
     SHAPE = (4,)
     DTYPE = numpy.ubyte
+    NUM_ELEMS = 4
 
     b: int = SimpleAccessor()
     g: int = SimpleAccessor()
@@ -98,6 +101,7 @@ class Color4D(NumPyStruct):
     C_TYPE = "struct aiColor4D"
     SHAPE = (4,)
     DTYPE = numpy.single
+    NUM_ELEMS = 4
 
     r: float = SimpleAccessor()
     """ Red, green, blue and alpha color values"""
@@ -123,6 +127,7 @@ class Plane(NumPyStruct):
     C_TYPE = "struct aiPlane"
     SHAPE = (2,)
     DTYPE = numpy.single
+    NUM_ELEMS = 2
 
     a: float = SimpleAccessor()
     """ Plane equation"""
@@ -147,6 +152,7 @@ class Color3D(NumPyStruct):
     C_TYPE = "struct aiColor3D"
     SHAPE = (3,)
     DTYPE = numpy.single
+    NUM_ELEMS = 3
 
     r: float = SimpleAccessor()
     """ Red, green and blue color values"""
@@ -266,6 +272,7 @@ class Quaternion(NumPyStruct):
     C_TYPE = "struct aiQuaternion"
     SHAPE = (4,)
     DTYPE = numpy.single
+    NUM_ELEMS = 4
 
     w: float = SimpleAccessor()
     """ w,x,y,z components of the quaternion"""
@@ -343,6 +350,7 @@ class Matrix4x4(NumPyStruct):
     C_TYPE = "struct aiMatrix4x4"
     SHAPE = (4, 4)
     DTYPE = numpy.single
+    NUM_ELEMS = 16
 
     a1: float = SimpleAccessor()
     a2: float = SimpleAccessor()
@@ -377,6 +385,7 @@ class Vector3D(NumPyStruct):
     C_TYPE = "struct aiVector3D"
     SHAPE = (3,)
     DTYPE = numpy.single
+    NUM_ELEMS = 3
 
     x: float = SimpleAccessor()
     y: float = SimpleAccessor()
