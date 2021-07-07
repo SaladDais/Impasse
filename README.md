@@ -3,15 +3,13 @@ Impasse Readme
 
 ![Python Test Status](https://github.com/SaladDais/Impasse/workflows/Run%20Python%20Tests/badge.svg) [![codecov](https://codecov.io/gh/SaladDais/Impasse/branch/master/graph/badge.svg?token=yCiY7MUMW5)](https://codecov.io/gh/SaladDais/Impasse)
 
-A simple Python wrapper for [Assimp](https://github.com/assimp/assimp) using `cffi` to access the library.
+A simple Python wrapper for [assimp](https://github.com/assimp/assimp) using `cffi` to access the library.
 Requires Python >= 3.7.
 
 It's largely based on [PyAssimp](https://github.com/assimp/assimp/tree/master/port/PyAssimp),
 Assimp's official Python port. In contrast to PyAssimp, it strictly targets modern Python 3 and
 provides type hints. It also aims to allow mutating scenes before exporting by having
 all wrapper classes operate directly on the underlying C data structures.
-
-Note that impasse is not complete. Many ASSIMP features are missing.
 
 ## Usage
 
@@ -45,13 +43,14 @@ substituted by assertions ...):
 
 ```python3
 from impasse import load
-with load('hello.3ds') as scene:
 
-  assert len(scene.meshes)
-  mesh = scene.meshes[0]
+scene = load('hello.3ds')
 
-  assert len(mesh.vertices)
-  print(mesh.vertices[0])
+assert len(scene.meshes)
+mesh = scene.meshes[0]
+
+assert len(mesh.vertices)
+print(mesh.vertices[0])
 ```
 
 Another example to list the 'top nodes' in a
@@ -59,10 +58,10 @@ scene:
 
 ```python
 from impasse import load
-with load('hello.3ds') as scene:
 
-  for c in scene.root_node.children:
-      print(str(c))
+scene = load('hello.3ds')
+for c in scene.root_node.children:
+    print(str(c))
 ```
 
 # Installing
@@ -89,6 +88,14 @@ To build that library, refer to the Assimp master `INSTALL`
 instructions. To look in more places, edit `./impasse/helper.py`.
 There's an `additional_dirs` list waiting for your entries.
 
+# Progress
+
+All features present in PyAssimp are now present in Assimp (plus a few more!) Since the API
+largely mirrors PyAssimp's, most existing code should work in Impasse with minor changes.
+
+Note that Impasse is not complete. Many assimp features are still missing, mostly around mutating
+scenes. Notably, anything that would require a `new` in assimp's C++ API is not supported.
+
 # Performance
 
 Impasse tries to avoid unnecessary copies or conversions of data owned by C, and most classes
@@ -102,9 +109,9 @@ Testing with the same `quicktest.py` script against assimp's test model director
 ```
 ** Loaded 169 models, got controlled errors for 28 files, 0 uncontrolled
 
-real	0m1.643s
-user	0m1.912s
-sys	0m0.531s
+real	0m1.460s
+user	0m1.676s
+sys	0m0.571s
 ```
 
 ## PyAssimp
