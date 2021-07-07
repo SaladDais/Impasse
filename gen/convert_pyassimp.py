@@ -210,6 +210,10 @@ def print_code():
             tuple_dets = TUPLE_STRUCTS[struct_cls_name]
             print(f"    SHAPE = {tuple_dets[1]!r}")
             print(f"    DTYPE = {tuple_dets[0]}")
+            num_elems = 1
+            for elem in tuple_dets[1]:
+                num_elems *= elem
+            print(f"    NUM_ELEMS = {num_elems}")
         print("")
         had_comment = False
         for field_name, type_data in fields_type_data.items():
