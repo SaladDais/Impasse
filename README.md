@@ -1,12 +1,12 @@
-Impasse Readme
-===============
+Impasse
+=======
 
 ![Python Test Status](https://github.com/SaladDais/Impasse/workflows/Run%20Python%20Tests/badge.svg) [![codecov](https://codecov.io/gh/SaladDais/Impasse/branch/master/graph/badge.svg?token=yCiY7MUMW5)](https://codecov.io/gh/SaladDais/Impasse)
 
 A simple Python wrapper for [assimp](https://github.com/assimp/assimp) using `cffi` to access the library.
 Requires Python >= 3.7.
 
-It's largely based on [PyAssimp](https://github.com/assimp/assimp/tree/master/port/PyAssimp),
+It's a fork of [PyAssimp](https://github.com/assimp/assimp/tree/master/port/PyAssimp),
 Assimp's official Python port. In contrast to PyAssimp, it strictly targets modern Python 3 and
 provides type hints. It also aims to allow mutating scenes before exporting by having
 all wrapper classes operate directly on the underlying C data structures.
@@ -102,7 +102,7 @@ Impasse tries to avoid unnecessary copies or conversions of data owned by C, and
 are just thin layers around the underlying CFFI structs. NumPy arrays that directly map to the
 underlying structs' memory are used for the coordinate structs like `Matrix4x4` and `Vector3D`.
 
-Testing with the same `quicktest.py` script against assimp's test model directory:
+Testing with a similar `quicktest.py` script against assimp's test model directory:
 
 ## Impasse
 
