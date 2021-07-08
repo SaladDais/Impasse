@@ -7,6 +7,8 @@ from __future__ import print_function
 import sys
 import logging
 
+import numpy
+
 import impasse
 from impasse.constants import ProcessingStep
 
@@ -42,17 +44,17 @@ def main(filename=None):
         print("  MESH" + str(index + 1))
         print("    material id:" + str(scene.materials.index(mesh.material) + 1))
         print("    vertices:" + str(len(mesh.vertices)))
-        print("    first 3 verts:\n" + str([tuple(v) for v in mesh.vertices[:3]]))
+        print("    first 3 verts:\n" + str(numpy.array(mesh.vertices[:3])))
         if mesh.normals:
-            print("    first 3 normals:\n" + str(mesh.normals[:3]))
+            print("    first 3 normals:\n" + str(numpy.array(mesh.normals[:3])))
         else:
             print("    no normals")
         print("    colors:" + str(len(mesh.colors)))
         tcs = mesh.texture_coords
         if tcs:
             for tc_index, tc in enumerate(tcs):
-                print("    texture-coords " + str(tc_index) + ":" + str(len(tcs[tc_index])) + "first3:" + str(
-                    tcs[tc_index][:3]))
+                print("    texture-coords " + str(tc_index) + ":" + str(len(tcs[tc_index])) + "first3:\n" + str(
+                    numpy.array(tcs[tc_index][:3])))
 
         else:
             print("    no texture coordinates")
