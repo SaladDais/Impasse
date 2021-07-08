@@ -473,6 +473,7 @@ class MetadataMapping(Mapping[str, METADATA_VAL]):
 
 # Materials-specific accessors and wrappers
 MATERIAL_PROP_VALUE = Union[numpy.ndarray, str, bytes, int, float]
+SETTABLE_MATERIAL_PROP_VALUE = Union[MATERIAL_PROP_VALUE, Sequence[float], Sequence[int]]
 
 
 class MaterialPropertyDataAccessor(SimpleAccessor[MATERIAL_PROP_VALUE]):
@@ -502,12 +503,12 @@ class MaterialPropertyDataAccessor(SimpleAccessor[MATERIAL_PROP_VALUE]):
         elif obj.struct.mType == MaterialPropertyType.BINARY:
             if size == 1:
                 # Probably a bool
-                return buf[0]
+                return buf[0][0]
             return bytes(buf)
         else:
             raise ValueError(f"Unknown material property type {obj.struct.mType}")
 
-    def __set__(self, obj: MaterialProperty, value: MATERIAL_PROP_VALUE):
+    def __set__(self, obj: MaterialProperty, value: SETTABLE_MATERIAL_PROP_VALUE):
         if obj.readonly:
             raise AttributeError("Trying to write to readonly material")
 
@@ -567,7 +568,7 @@ class MaterialMapping(Mapping[PROPERTY_KEY, MATERIAL_PROP_VALUE]):
     def __getitem__(self, item: PROPERTY_KEY) -> MATERIAL_PROP_VALUE:
         return self._get_prop(item).data
 
-    def __setitem__(self, item: PROPERTY_KEY, value: MATERIAL_PROP_VALUE):
+    def __setitem__(self, item: PROPERTY_KEY, value: SETTABLE_MATERIAL_PROP_VALUE):
         self._get_prop(item).data = value
 
     def __repr__(self):
