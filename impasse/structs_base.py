@@ -133,10 +133,12 @@ class NumPyStruct(SerializableStruct):
         if isinstance(val, NumPyStruct):
             return super().to_c(instance, val)
 
-        if val.dtype != cls.DTYPE:
-            raise ValueError(f"{val.dtype} != {cls.DTYPE}")
         if val.size != cls.NUM_ELEMS:
             raise ValueError(f"{val.size} != {cls.NUM_ELEMS}")
+        if val.dtype != cls.DTYPE:
+            # Likely to happen if you didn't specify a dtype and your native dtype
+            # is different from that of the struct.
+            val = val.astype(cls.DTYPE)
         ffi.buffer(instance, cls.get_size())[:] = val.flatten().data
 
     @classmethod
