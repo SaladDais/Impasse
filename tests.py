@@ -3,6 +3,7 @@ import tempfile
 import unittest
 
 import numpy
+from impasse.structs import Scene
 
 import impasse
 from impasse.constants import TextureSemantic, MaterialPropertyKey
@@ -13,6 +14,7 @@ from impasse.constants import TextureSemantic, MaterialPropertyKey
 HERE = os.path.abspath(os.path.dirname(__file__))
 MODELS_DIR = os.path.abspath(os.path.join(HERE, 'test_data'))
 TEST_SKINNED_MODEL = os.path.join(MODELS_DIR, 'glTF2', 'simple_skin', 'simple_skin.gltf')
+TEST_TEXTURED = os.path.join(MODELS_DIR, 'glTF2', 'BoxTextured-glTF', 'BoxTextured.gltf')
 TEST_COLLADA = os.path.join(MODELS_DIR, 'Collada', 'COLLADA.dae')
 
 
@@ -115,19 +117,35 @@ class ImpasseTests(unittest.TestCase):
 
     def test_mutate_diffuse_color(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
-        materials = scene.materials[1].as_mapping()
-        diffuse = materials[MaterialPropertyKey.COLOR_DIFFUSE]
+        material = scene.materials[1].as_mapping()
+        diffuse = material[MaterialPropertyKey.COLOR_DIFFUSE]
         print(diffuse)
-        materials[MaterialPropertyKey.COLOR_DIFFUSE] = [1.0, 2.0, 3.0, 1.0]
-        diffuse = materials[MaterialPropertyKey.COLOR_DIFFUSE]
+        material[MaterialPropertyKey.COLOR_DIFFUSE] = [1.0, 2.0, 3.0, 1.0]
+        diffuse = material[MaterialPropertyKey.COLOR_DIFFUSE]
         self.assertEqual([1.0, 2.0, 3.0, 1.0], list(diffuse))
 
     def test_mutate_diffuse_color_in_place(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
-        materials = scene.materials[1].as_mapping()
-        diffuse = materials[MaterialPropertyKey.COLOR_DIFFUSE]
+        material = scene.materials[1].as_mapping()
+        diffuse = material[MaterialPropertyKey.COLOR_DIFFUSE]
         diffuse[0:3] = [1.0, 2.0, 3.0]
-        self.assertEqual([1.0, 2.0, 3.0, 1.0], list(materials[MaterialPropertyKey.COLOR_DIFFUSE]))
+        self.assertEqual([1.0, 2.0, 3.0, 1.0], list(material[MaterialPropertyKey.COLOR_DIFFUSE]))
+
+    def test_mutate_material_bool(self):
+        scene = impasse.load(TEST_SKINNED_MODEL).copy_mutable()
+        material = scene.materials[0].as_mapping()
+        material[MaterialPropertyKey.TWOSIDED] = True
+        self.assertTrue(material[MaterialPropertyKey.TWOSIDED])
+
+    def test_texture_coords(self):
+        scene = impasse.load(TEST_TEXTURED)
+        first_coord = scene.meshes[0].texture_coords[0][0]
+        numpy.testing.assert_almost_equal([6, 1, 0], first_coord, 5)
+
+    def test_struct_eq(self):
+        scene = impasse.load(TEST_TEXTURED)
+        other_scene = Scene(scene.struct)
+        self.assertEqual(scene, other_scene)
 
 
 if __name__ == "__main__":
