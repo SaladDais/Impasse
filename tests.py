@@ -113,6 +113,22 @@ class ImpasseTests(unittest.TestCase):
         # Check that we actually mutated the underlying data
         self.assertEqual(40.0, scene.meshes[0].vertices[0][1])
 
+    def test_mutate_diffuse_color(self):
+        scene = impasse.load(TEST_COLLADA).copy_mutable()
+        materials = scene.materials[1].as_mapping()
+        diffuse = materials[MaterialPropertyKey.COLOR_DIFFUSE]
+        print(diffuse)
+        materials[MaterialPropertyKey.COLOR_DIFFUSE] = [1.0, 2.0, 3.0, 1.0]
+        diffuse = materials[MaterialPropertyKey.COLOR_DIFFUSE]
+        self.assertEqual([1.0, 2.0, 3.0, 1.0], list(diffuse))
+
+    def test_mutate_diffuse_color_in_place(self):
+        scene = impasse.load(TEST_COLLADA).copy_mutable()
+        materials = scene.materials[1].as_mapping()
+        diffuse = materials[MaterialPropertyKey.COLOR_DIFFUSE]
+        diffuse[0:3] = [1.0, 2.0, 3.0]
+        self.assertEqual([1.0, 2.0, 3.0, 1.0], list(materials[MaterialPropertyKey.COLOR_DIFFUSE]))
+
 
 if __name__ == "__main__":
     unittest.main()
