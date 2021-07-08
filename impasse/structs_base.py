@@ -89,7 +89,7 @@ class SerializableStruct(CSerializableBase):
 
     def __eq__(self, other: Any):
         if not isinstance(other, SerializableStruct):
-            return False
+            return NotImplemented
         return other.struct == self.struct
 
 
@@ -278,6 +278,22 @@ class StaticSequence(BaseSequence):
         return self.size
 
 
+_K = TypeVar("_K")
+_V = TypeVar("_V")
+
+
+class SerializableMapping(SerializableStruct, Mapping[_K, _V], abc.ABC):
+    def __repr__(self):
+        return f"{self.__class__.__name__}<{dict(self)!r}>"
+
+    def __eq__(self, other):
+        # Try to do a struct-wise compare first
+        val = SerializableStruct.__eq__(self, other)
+        if val is not NotImplemented:
+            return val
+        return Mapping.__eq__(self, other)
+
+
 class BaseAccessor(Generic[_T], abc.ABC):
     __slots__ = ("name",)
 
@@ -444,7 +460,7 @@ class MetadataEntryDataAccessor(SimpleAccessor[METADATA_VAL]):
             raise NotImplementedError()
 
 
-class MetadataMapping(Mapping[str, METADATA_VAL], SerializableStruct, abc.ABC):
+class MetadataMapping(SerializableMapping[str, METADATA_VAL], abc.ABC):
     num_properties: int
     meta_keys: BaseSequence[str]
     meta_values: BaseSequence[MetadataEntry]
@@ -467,9 +483,6 @@ class MetadataMapping(Mapping[str, METADATA_VAL], SerializableStruct, abc.ABC):
                 self.meta_values[i].data = value
                 return
         raise KeyError(repr(item))
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}<{dict(self)!r}>"
 
 
 # Materials-specific accessors and wrappers
@@ -544,7 +557,7 @@ REAL_PROPERTY_KEY = Tuple[str, Union[TextureSemantic, int]]
 PROPERTY_KEY = Union[str, REAL_PROPERTY_KEY]
 
 
-class MaterialMapping(Mapping[PROPERTY_KEY, MATERIAL_PROP_VALUE], SerializableStruct, abc.ABC):
+class MaterialMapping(SerializableMapping[PROPERTY_KEY, MATERIAL_PROP_VALUE], abc.ABC):
     properties: BaseSequence[MaterialProperty]
 
     def __len__(self) -> int:
@@ -568,9 +581,6 @@ class MaterialMapping(Mapping[PROPERTY_KEY, MATERIAL_PROP_VALUE], SerializableSt
 
     def __setitem__(self, item: PROPERTY_KEY, value: SETTABLE_MATERIAL_PROP_VALUE):
         self._get_prop(item).data = value
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}<{dict(self)!r}>"
 
 
 FUNCTION_DECLS = """
