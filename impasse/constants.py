@@ -1,4 +1,5 @@
 import enum
+from typing import NamedTuple
 
 AI_MAX_NUMBER_OF_TEXTURECOORDS = 0x8
 AI_MAX_NUMBER_OF_COLOR_SETS = 0x8
@@ -664,3 +665,99 @@ class ProcessingPreset:
         | ProcessingStep.ValidateDataStructure
         | ProcessingStep.OptimizeMeshes
     )
+
+
+class MaterialPropertyTuple(NamedTuple):
+    name: str
+    semantic: int
+
+
+class MaterialPropertyKey:
+    def __init__(self):
+        raise RuntimeError("Don't instantiate this")
+
+    # https://github.com/assimp/assimp/blob/1d33131e902ff3f6b571ee3964c666698a99eb0f/include/assimp/material.h#L943
+    # TODO: There should be some constants that also specify an index into
+    #   the property's array after the semantic. Should add support for that.
+    NAME = MaterialPropertyTuple("?mat.name", 0)
+    TWOSIDED = MaterialPropertyTuple("$mat.twosided", 0)
+    SHADING_MODEL = MaterialPropertyTuple("$mat.shadingm", 0)
+    ENABLE_WIREFRAME = MaterialPropertyTuple("$mat.wireframe", 0)
+    BLEND_FUNC = MaterialPropertyTuple("$mat.blend", 0)
+    OPACITY = MaterialPropertyTuple("$mat.opacity", 0)
+    TRANSPARENCYFACTOR = MaterialPropertyTuple("$mat.transparencyfactor", 0)
+    BUMPSCALING = MaterialPropertyTuple("$mat.bumpscaling", 0)
+    SHININESS = MaterialPropertyTuple("$mat.shininess", 0)
+    REFLECTIVITY = MaterialPropertyTuple("$mat.reflectivity", 0)
+    SHININESS_STRENGTH = MaterialPropertyTuple("$mat.shinpercent", 0)
+    REFRACTI = MaterialPropertyTuple("$mat.refracti", 0)
+    COLOR_DIFFUSE = MaterialPropertyTuple("$clr.diffuse", 0)
+    COLOR_AMBIENT = MaterialPropertyTuple("$clr.ambient", 0)
+    COLOR_SPECULAR = MaterialPropertyTuple("$clr.specular", 0)
+    COLOR_EMISSIVE = MaterialPropertyTuple("$clr.emissive", 0)
+    COLOR_TRANSPARENT = MaterialPropertyTuple("$clr.transparent", 0)
+    COLOR_REFLECTIVE = MaterialPropertyTuple("$clr.reflective", 0)
+    GLOBAL_BACKGROUND_IMAGE = MaterialPropertyTuple("?bg.global", 0)
+    GLOBAL_SHADERLANG = MaterialPropertyTuple("?sh.lang", 0)
+    SHADER_VERTEX = MaterialPropertyTuple("?sh.vs", 0)
+    SHADER_FRAGMENT = MaterialPropertyTuple("?sh.fs", 0)
+    SHADER_GEO = MaterialPropertyTuple("?sh.gs", 0)
+    SHADER_TESSELATION = MaterialPropertyTuple("?sh.ts", 0)
+    SHADER_PRIMITIVE = MaterialPropertyTuple("?sh.ps", 0)
+    SHADER_COMPUTE = MaterialPropertyTuple("?sh.cs", 0)
+    BASE_COLOR = MaterialPropertyTuple("$clr.base", 0)
+    USE_METALLIC_MAP = MaterialPropertyTuple("$mat.useMetallicMap", 0)
+    # Metallic factor. 0.0 = Full Dielectric, 1.0 = Full Metal
+    METALLIC_FACTOR = MaterialPropertyTuple("$mat.metallicFactor", 0)
+
+    USE_ROUGHNESS_MAP = MaterialPropertyTuple("$mat.useRoughnessMap", 0)
+    # Roughness factor. 0.0 = Perfectly Smooth, 1.0 = Completely Rough
+    ROUGHNESS_FACTOR = MaterialPropertyTuple("$mat.roughnessFactor", 0)
+    # Specular/Glossiness Workflow
+    # ---------------------------
+    # Diffuse/Albedo Color. Note: Pure Metals have a diffuse of {0,0,0}
+    # AI_MATKEY_COLOR_DIFFUSE
+    # Specular Color.
+    # Note: Metallic/Roughness may also have a Specular Color
+    # AI_MATKEY_COLOR_SPECULAR
+    SPECULAR_FACTOR = MaterialPropertyTuple("$mat.specularFactor", 0)
+    # Glossiness factor. 0.0 = Completely Rough, 1.0 = Perfectly Smooth
+    GLOSSINESS_FACTOR = MaterialPropertyTuple("$mat.glossinessFactor", 0)
+
+    # Sheen
+    # -----
+    # Sheen base RGB color. Default {0,0,0}
+    SHEEN_COLOR_FACTOR = MaterialPropertyTuple("$clr.sheen.factor", 0)
+    # Sheen Roughness Factor.
+    SHEEN_ROUGHNESS_FACTOR = MaterialPropertyTuple("$mat.sheen.roughnessFactor", 0)
+
+    # Clearcoat
+    # ---------
+    # Clearcoat layer intensity. 0.0 = none (disabled)
+    CLEARCOAT_FACTOR = MaterialPropertyTuple("$mat.clearcoat.factor", 0)
+    CLEARCOAT_ROUGHNESS_FACTOR = MaterialPropertyTuple("$mat.clearcoat.roughnessFactor", 0)
+
+    # Transmission
+    # ------------
+    # https:#github.com/KhronosGroup/glTF/tree/master/extensions/2.0/Khronos/KHR_materials_transmission
+    # Base percentage of light transmitted through the surface. 0.0 = Opaque, 1.0 = Fully transparent
+    TRANSMISSION_FACTOR = MaterialPropertyTuple("$mat.transmission.factor", 0)
+    # Texture defining percentage of light transmitted through the surface.
+    # Multiplied by AI_MATKEY_TRANSMISSION_FACTOR
+
+    # Emissive
+    # --------
+    USE_EMISSIVE_MAP = MaterialPropertyTuple("$mat.useEmissiveMap", 0)
+    EMISSIVE_INTENSITY = MaterialPropertyTuple("$mat.emissiveIntensity", 0)
+    USE_AO_MAP = MaterialPropertyTuple("$mat.useAOMap", 0)
+
+    TEXTURE = "$tex.file"
+    UVWSRC = "$tex.uvwsrc"
+    TEXOP = "$tex.op"
+    MAPPING = "$tex.mapping"
+    TEXBLEND = "$tex.blend"
+    MAPPINGMODE_U = "$tex.mapmodeu"
+    MAPPINGMODE_V = "$tex.mapmodev"
+    TEXMAP_AXIS = "$tex.mapaxis"
+    UVTRANSFORM = "$tex.uvtrafo"
+    TEXFLAGS = "$tex.flags"

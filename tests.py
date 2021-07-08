@@ -5,7 +5,7 @@ import unittest
 import numpy
 
 import impasse
-from impasse.constants import TextureSemantic
+from impasse.constants import TextureSemantic, MaterialPropertyKey
 
 # Find the root path of the test file so we can find the
 # test models above our directory
@@ -32,6 +32,11 @@ class ImpasseTests(unittest.TestCase):
         material_map = scene.materials[0].as_mapping()
         self.assertEqual(material_map["?mat.name"], "RedPlastic")
         self.assertEqual(material_map["?mat.name", TextureSemantic.NONE], "RedPlastic")
+
+    def test_materials_mapping_constant_access(self):
+        scene = impasse.load(TEST_COLLADA)
+        material_map = scene.materials[0].as_mapping()
+        self.assertEqual(material_map[MaterialPropertyKey.NAME], "RedPlastic")
 
     def test_mutate_materials_mapping(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()

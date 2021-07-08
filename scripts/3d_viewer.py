@@ -48,7 +48,7 @@ from numpy import linalg
 
 import impasse
 import transformations
-from impasse.constants import ProcessingPreset
+from impasse.constants import ProcessingPreset, MaterialPropertyKey
 from impasse.structs import Scene, Camera, Node
 
 ROTATION_180_X = numpy.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, -1, 0], [0, 0, 0, 1]], dtype=numpy.float32)
@@ -995,7 +995,7 @@ class Impasse3DViewer:
                             diffuse = [1.0, 0.0, 0.0, 1.0]  # selected nodes in red
                         else:
                             material = mesh.material
-                            diffuse = list(material.as_mapping()["$clr.diffuse"])
+                            diffuse = list(material.as_mapping()[MaterialPropertyKey.COLOR_DIFFUSE])
                         if len(diffuse) == 3:  # RGB instead of expected RGBA
                             diffuse.append(1.0)
                         glUniform4f(shader.u_materialDiffuse, *diffuse)
