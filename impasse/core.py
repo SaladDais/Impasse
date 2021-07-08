@@ -33,6 +33,12 @@ class ImportedScene(Scene):
         self._readonly = True
 
     def copy_mutable(self) -> CopiedScene:
+        """
+        Return a mutable copy of the Scene
+
+        import() returns a const pointer, if you want to mutate a scene you're
+        supposed to copy it first.
+        """
         copy_out = ffi.new("struct aiScene **")
         _assimp_lib.aiCopyScene(self.struct, copy_out)
         if not copy_out[0]:
