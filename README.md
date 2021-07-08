@@ -18,7 +18,7 @@ all wrapper classes operate directly on the underlying C data structures.
 `impasse` comes with a simple 3D viewer that shows how to load and display a 3D
 model using a shader-based OpenGL pipeline.
 
-![Screenshot](3d_viewer_screenshot.png)
+![Screenshot](https://raw.githubusercontent.com/SaladDais/Impasse/master/3d_viewer_screenshot.png)
 
 To use it:
 
