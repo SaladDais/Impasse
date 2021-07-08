@@ -365,22 +365,24 @@ class VertexPropSequenceAccessor(StaticSequenceAccessor):
         )
 
 
-class TextureDataAccessor(SimpleAccessor[Union[bytearray, numpy.ndarray]]):
+class TextureDataAccessor(SimpleAccessor[Union[bytes, numpy.ndarray]]):
     __slots__ = ()
 
-    def __get__(self, obj: Texture, owner: Optional[Type] = None) -> Union[bytearray, numpy.ndarray]:
+    def __get__(self, obj: Texture, owner: Optional[Type] = None) -> Union[bytes, numpy.ndarray]:
+        scene = obj.get_scene()
         pcdata = obj.struct.pcData
         assert pcdata
         if obj.height:
             # Uncompressed RGBA8888
-            pixels = []
-            for i in range(obj.width * obj.height):
-                p = pcdata[i]
-                pixels.extend((p.r, p.g, p.b, p.a))
-            return numpy.array(pixels, dtype=numpy.ubyte).reshape((obj.height, obj.width, 4))
+            # This is actually an aiTexel, a struct of 4 bytes, but the structs
+            # are explicitly packed so we can treat as a contiguous byte array.
+            buf = ffi.buffer(pcdata, obj.height * obj.width * 4)
+            val = numpy.ndarray(buffer=buf, dtype=numpy.ubyte, shape=(obj.height, obj.width, 4))
+            val.flags.writeable = scene is None or not scene.readonly
+            return val
 
         # Compressed data
-        return bytearray(ffi.buffer(pcdata, obj.width))
+        return bytes(ffi.buffer(pcdata, obj.width))
 
     def __set__(self, instance, value):
         raise NotImplementedError()

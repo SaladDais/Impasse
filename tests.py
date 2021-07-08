@@ -18,6 +18,7 @@ MODELS_DIR = os.path.abspath(os.path.join(HERE, 'test_data'))
 TEST_SKINNED_MODEL = os.path.join(MODELS_DIR, 'glTF2', 'simple_skin', 'simple_skin.gltf')
 TEST_TEXTURED = os.path.join(MODELS_DIR, 'glTF2', 'BoxTextured-glTF', 'BoxTextured.gltf')
 TEST_COLLADA = os.path.join(MODELS_DIR, 'Collada', 'COLLADA.dae')
+TEST_MDL_TEXTURED = os.path.join(MODELS_DIR, 'MDL3 (3DGS A4)', 'minigun.MDL')
 
 
 class ImpasseTests(unittest.TestCase):
@@ -158,6 +159,10 @@ class ImpasseTests(unittest.TestCase):
         bb_min, bb_max = get_bounding_box(scene)
         numpy.testing.assert_almost_equal([-0.5, -0.5, -0.5], bb_min, 5)
         numpy.testing.assert_almost_equal([0.5, 0.5, 0.5], bb_max, 5)
+
+    def test_texture_data(self):
+        scene = impasse.load(TEST_MDL_TEXTURED)
+        self.assertEqual(scene.textures[0].data.shape, (1114, 1272, 4))
 
 
 if __name__ == "__main__":
