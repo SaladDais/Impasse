@@ -3,6 +3,8 @@ import tempfile
 import unittest
 
 import numpy
+
+from impasse.helper import get_bounding_box
 from impasse.structs import Scene
 
 import impasse
@@ -146,6 +148,12 @@ class ImpasseTests(unittest.TestCase):
         scene = impasse.load(TEST_TEXTURED)
         other_scene = Scene(scene.struct)
         self.assertEqual(scene, other_scene)
+
+    def test_bounding_box(self):
+        scene = impasse.load(TEST_TEXTURED)
+        bb_min, bb_max = get_bounding_box(scene)
+        numpy.testing.assert_almost_equal([-0.5, -0.5, -0.5], bb_min, 5)
+        numpy.testing.assert_almost_equal([0.5, 0.5, 0.5], bb_max, 5)
 
 
 if __name__ == "__main__":
