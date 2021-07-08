@@ -5,6 +5,7 @@ This is the main-module of Impasse.
 """
 from __future__ import annotations
 
+import os
 import sys
 from typing import Optional, Union, BinaryIO, List
 import logging
@@ -125,7 +126,7 @@ def export(
     export_status = _assimp_lib.aiExportScene(
         scene.struct,
         file_type.encode("ascii"),
-        filename.encode(sys.getfilesystemencoding()),
+        os.path.abspath(filename).encode(sys.getfilesystemencoding()),
         processing,
     )
 
