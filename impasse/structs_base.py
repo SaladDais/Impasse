@@ -485,7 +485,8 @@ class MaterialPropertyDataAccessor(SimpleAccessor[MATERIAL_PROP_VALUE]):
     }
 
     def __get__(self, obj: MaterialProperty, owner=None) -> MATERIAL_PROP_VALUE:
-        buf = ffi.buffer(obj.struct.mData, obj.struct.mDataLength)
+        size = obj.struct.mDataLength
+        buf = ffi.buffer(obj.struct.mData, size)
         if obj.struct.mType in self.ARRAY_ELEM_TYPES:
             elem_size, numpy_elem_type = self.ARRAY_ELEM_TYPES[obj.struct.mType]
             arr_size = len(buf) // elem_size
@@ -499,6 +500,9 @@ class MaterialPropertyDataAccessor(SimpleAccessor[MATERIAL_PROP_VALUE]):
         elif obj.struct.mType == MaterialPropertyType.AISTRING:
             return StringAdapter.from_c(ffi.cast("struct aiMaterialPropertyString *", obj.struct.mData))
         elif obj.struct.mType == MaterialPropertyType.BINARY:
+            if size == 1:
+                # Probably a bool
+                return buf[0]
             return bytes(buf)
         else:
             raise ValueError(f"Unknown material property type {obj.struct.mType}")
@@ -519,8 +523,14 @@ class MaterialPropertyDataAccessor(SimpleAccessor[MATERIAL_PROP_VALUE]):
             buf[:] = arr.flatten().data
             return arr
         elif obj.struct.mType == MaterialPropertyType.AISTRING:
-            StringAdapter.to_c(ffi.cast("struct aiMaterialPropertyString *", obj.struct.mData), value)
+            str_ptr = ffi.cast("struct aiMaterialPropertyString *", obj.struct.mData)
+            StringAdapter.to_c(str_ptr, value)
+            # data length only reflects the parts of the struct we're using,
+            # not the actual alloc size.
+            obj.struct.mDataLength = str_ptr.length + 1 + ffi.sizeof("int")
         elif obj.struct.mType == MaterialPropertyType.BINARY:
+            if not isinstance(value, (bytes, memoryview, bytearray)):
+                value = bytes((value,))
             # Will error if not the same length as the existing data
             # Seems like this type is mostly used for ints anyway.
             buf[:] = value
