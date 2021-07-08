@@ -33,8 +33,8 @@ You can use this code as starting point in your applications.
 To get started with `impasse`, examine the simpler `sample.py` script in `scripts/`,
 which illustrates the basic usage. All Assimp data structures are wrapped using
 `ctypes`. All the data+length fields in Assimp's data structures (such as
-`aiMesh::mNumVertices`, `aiMesh::mVertices`) are replaced by simple python
-lists, so you can call `len()` on them to get their respective size and access
+`aiMesh::mNumVertices`, `aiMesh::mVertices`) are replaced by list-like wrapper classes,
+so you can call `len()` on them to get their respective size and access
 members using `[]`.
 
 For example, to load a file named `hello.3ds` and print the first
@@ -62,6 +62,26 @@ from impasse import load
 scene = load('hello.3ds')
 for c in scene.root_node.children:
     print(str(c))
+```
+
+All of assimp's coordinate classes are returned as NumPy arrays, so you can
+work with them using library for 3d math that handles NumPy arrays. Using transforms.py
+to modify the scene:
+
+```python
+import math
+
+import numpy
+import transformations
+import impasse
+
+# assimp returns an immutable scene, we have to copy it if we want to change it
+scene = impasse.load('hello.3ds').copy_mutable()
+transform = scene.root_node.transformation
+# Rotate the root node's transform by 180 deg on X
+transform = numpy.dot(transformations.rotation_matrix(math.pi, (1, 0, 0)), transform)
+scene.root_node.transformation = transform
+impasse.export(scene, 'whatever.obj', 'obj')
 ```
 
 # Installing
@@ -94,7 +114,7 @@ All features present in PyAssimp are now present in Assimp (plus a few more!) Si
 largely mirrors PyAssimp's, most existing code should work in Impasse with minor changes.
 
 Note that Impasse is not complete. Many assimp features are still missing, mostly around mutating
-scenes. Notably, anything that would require a `new` in assimp's C++ API is not supported.
+scenes. Notably, anything that would require a `new` or `delete` in assimp's C++ API is not supported.
 
 # Performance
 
