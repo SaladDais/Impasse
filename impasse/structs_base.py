@@ -9,7 +9,7 @@ import numpy
 from .constants import MaterialPropertyType, MetadataType, TextureSemantic
 
 if TYPE_CHECKING:
-    from .structs import Texture, MaterialProperty, MetadataEntry, Material, Metadata, Scene, Mesh
+    from .structs import Texture, MaterialProperty, MetadataEntry, Material, Scene, Mesh
 
 ffi = cffi.FFI()
 
@@ -444,28 +444,27 @@ class MetadataEntryDataAccessor(SimpleAccessor[METADATA_VAL]):
             raise NotImplementedError()
 
 
-class MetadataMapping(Mapping[str, METADATA_VAL]):
-    __slots__ = ("_metadata",)
-
-    def __init__(self, metadata: Metadata):
-        self._metadata = metadata
+class MetadataMapping(Mapping[str, METADATA_VAL], SerializableStruct, abc.ABC):
+    num_properties: int
+    meta_keys: BaseSequence[str]
+    meta_values: BaseSequence[MetadataEntry]
 
     def __len__(self) -> int:
-        return self._metadata.num_properties
+        return self.num_properties
 
     def __iter__(self) -> Iterator[str]:
-        return iter(self._metadata.keys)
+        return iter(self.meta_keys)
 
     def __getitem__(self, item: str) -> METADATA_VAL:
-        for i, k in enumerate(self._metadata.keys):
+        for i, k in enumerate(self.meta_keys):
             if k == item:
-                return self._metadata.values[i].data
+                return self.meta_values[i].data
         raise KeyError(repr(item))
 
     def __setitem__(self, item: str, value: METADATA_VAL):
-        for i, k in enumerate(self._metadata.keys):
+        for i, k in enumerate(self.meta_keys):
             if k == item:
-                self._metadata.values[i].data = value
+                self.meta_values[i].data = value
                 return
         raise KeyError(repr(item))
 
@@ -545,24 +544,21 @@ REAL_PROPERTY_KEY = Tuple[str, Union[TextureSemantic, int]]
 PROPERTY_KEY = Union[str, REAL_PROPERTY_KEY]
 
 
-class MaterialMapping(Mapping[PROPERTY_KEY, MATERIAL_PROP_VALUE]):
-    __slots__ = ("_material",)
-
-    def __init__(self, material: Material):
-        self._material = material
+class MaterialMapping(Mapping[PROPERTY_KEY, MATERIAL_PROP_VALUE], SerializableStruct, abc.ABC):
+    properties: BaseSequence[MaterialProperty]
 
     def __len__(self) -> int:
-        return len(self._material.properties)
+        return len(self.properties)
 
     def __iter__(self) -> Iterator[REAL_PROPERTY_KEY]:
-        return iter(((p.key, p.semantic) for p in self._material.properties))
+        return iter(((p.key, p.semantic) for p in self.properties))
 
     def _get_prop(self, key: PROPERTY_KEY) -> MaterialProperty:
         if isinstance(key, str):
             item, semantic = key, TextureSemantic.NONE
         else:
             item, semantic = key
-        for prop in self._material.properties:
+        for prop in self.properties:
             if prop.semantic == semantic and prop.key == item:
                 return prop
         raise KeyError(repr((item, semantic)))

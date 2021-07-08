@@ -448,27 +448,24 @@ struct aiMetadata {
 """
 
 
-class Metadata(SerializableStruct):
+class Metadata(MetadataMapping):
     __slots__ = ()
     C_TYPE = "struct aiMetadata"
 
     num_properties: int = SimpleAccessor(name='mNumProperties')
     """Length of the mKeys and mValues arrays, respectively"""
 
-    keys: BaseSequence[str] = DynamicSequenceAccessor('mKeys', 'mNumProperties', StringAdapter)
+    meta_keys: BaseSequence[str] = DynamicSequenceAccessor('mKeys', 'mNumProperties', StringAdapter)
     """
     Arrays of keys, may not be NULL. Entries in this array may not be NULL
     as well.
     """
 
-    values: BaseSequence[MetadataEntry] = DynamicSequenceAccessor('mValues', 'mNumProperties', MetadataEntry)
+    meta_values: BaseSequence[MetadataEntry] = DynamicSequenceAccessor('mValues', 'mNumProperties', MetadataEntry)
     """
     Arrays of values, may not be NULL. Entries in this array may be NULL
     if the corresponding property key has no assigned value.
     """
-
-    def as_mapping(self) -> MetadataMapping:
-        return MetadataMapping(self)
 
 
 C_SRC += """
@@ -883,7 +880,7 @@ struct aiMaterial {
 """
 
 
-class Material(SerializableStruct):
+class Material(MaterialMapping):
     __slots__ = ()
     C_TYPE = "struct aiMaterial"
 
@@ -892,9 +889,6 @@ class Material(SerializableStruct):
 
     num_allocated: int = SimpleAccessor(name='mNumAllocated')
     """Storage allocated"""
-
-    def as_mapping(self) -> MaterialMapping:
-        return MaterialMapping(self)
 
 
 C_SRC += """

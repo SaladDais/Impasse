@@ -203,6 +203,8 @@ def print_code():
         base_wrapper_cls = "SerializableStruct"
         if struct_cls_name in TUPLE_STRUCTS:
             base_wrapper_cls = "NumPyStruct"
+        elif struct_cls_name in SUPPORTS_MAPPING:
+            base_wrapper_cls = f"{struct_cls_name}Mapping"
         print(f"class {struct_cls_name}({base_wrapper_cls}):")
         print("    __slots__ = ()")
         print(f"    C_TYPE = \"struct ai{struct_cls_name}\"")
@@ -274,6 +276,11 @@ def print_code():
                 python_name = "material"
                 type_sig = "Material"
                 adapter_name = "MaterialIndexAdapter"
+            elif struct_cls_name == "Metadata":
+                if field_name == "mKeys":
+                    python_name = "meta_keys"
+                elif field_name == "mValues":
+                    python_name = "meta_values"
 
             if num_elem_field:
                 type_sig = f"BaseSequence[{type_sig}]"
@@ -329,10 +336,6 @@ def print_code():
             print("")
             print("    def __repr__(self):")
             print("        return f'{self.__class__.__name__}<name={self.name!r}>'")
-        if struct_cls_name in SUPPORTS_MAPPING:
-            print("")
-            print(f"    def as_mapping(self) -> {struct_cls_name}Mapping:")
-            print(f"        return {struct_cls_name}Mapping(self)")
         print("\n")
     print("ffi.cdef(FUNCTION_DECLS + C_SRC)")
 
