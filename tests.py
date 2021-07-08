@@ -144,6 +144,10 @@ class ImpasseTests(unittest.TestCase):
         first_coord = scene.meshes[0].texture_coords[0][0]
         numpy.testing.assert_almost_equal([6, 1, 0], first_coord, 5)
 
+    def test_num_uv_coords(self):
+        scene = impasse.load(TEST_TEXTURED)
+        self.assertEqual(2, scene.meshes[0].num_uv_components[0])
+
     def test_struct_eq(self):
         scene = impasse.load(TEST_TEXTURED)
         other_scene = Scene(scene.struct)
