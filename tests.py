@@ -4,10 +4,9 @@ import unittest
 
 import numpy
 
+import impasse
 from impasse.helper import get_bounding_box
 from impasse.structs import Scene
-
-import impasse
 from impasse.constants import TextureSemantic, MaterialPropertyKey
 
 # Find the root path of the test file so we can find the
@@ -34,31 +33,29 @@ class ImpasseTests(unittest.TestCase):
 
     def test_materials_mapping(self):
         scene = impasse.load(TEST_COLLADA)
-        material_map = scene.materials[0].as_mapping()
+        material_map = scene.materials[0]
         self.assertEqual(material_map["?mat.name"], "RedPlastic")
         self.assertEqual(material_map["?mat.name", TextureSemantic.NONE], "RedPlastic")
 
     def test_materials_mapping_constant_access(self):
         scene = impasse.load(TEST_COLLADA)
-        material_map = scene.materials[0].as_mapping()
+        material_map = scene.materials[0]
         self.assertEqual(material_map[MaterialPropertyKey.NAME], "RedPlastic")
 
     def test_mutate_materials_mapping(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
-        material_map = scene.materials[0].as_mapping()
+        material_map = scene.materials[0]
         material_map["?mat.name"] = "BluePlastic"
         self.assertEqual(material_map["?mat.name", TextureSemantic.NONE], "BluePlastic")
 
     def test_metadata_mapping(self):
         scene = impasse.load(TEST_COLLADA)
-        metadata = scene.metadata.as_mapping()
-        self.assertEqual(metadata['Created'], '2006-06-21T21:15:16Z')
+        self.assertEqual(scene.metadata['Created'], '2006-06-21T21:15:16Z')
 
     def test_mutate_metadata_mapping(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
-        metadata = scene.metadata.as_mapping()
-        metadata['Created'] = '2026-06-21T21:15:16Z'
-        self.assertEqual(metadata['Created'], '2026-06-21T21:15:16Z')
+        scene.metadata['Created'] = '2026-06-21T21:15:16Z'
+        self.assertEqual(scene.metadata['Created'], '2026-06-21T21:15:16Z')
 
     def test_export(self):
         scene = impasse.load(TEST_COLLADA)
@@ -97,7 +94,7 @@ class ImpasseTests(unittest.TestCase):
             if child.name == "Collada":
                 collada = child
         self.assertIsNotNone(collada)
-        material_map = collada.meshes[0].material.as_mapping()
+        material_map = collada.meshes[0].material
         self.assertEqual(material_map["?mat.name"], "RedPlastic")
 
     def test_mesh_numpy_properties(self):
@@ -120,7 +117,7 @@ class ImpasseTests(unittest.TestCase):
 
     def test_mutate_diffuse_color(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
-        material = scene.materials[1].as_mapping()
+        material = scene.materials[1]
         diffuse = material[MaterialPropertyKey.COLOR_DIFFUSE]
         print(diffuse)
         material[MaterialPropertyKey.COLOR_DIFFUSE] = [1.0, 2.0, 3.0, 1.0]
@@ -129,14 +126,14 @@ class ImpasseTests(unittest.TestCase):
 
     def test_mutate_diffuse_color_in_place(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
-        material = scene.materials[1].as_mapping()
+        material = scene.materials[1]
         diffuse = material[MaterialPropertyKey.COLOR_DIFFUSE]
         diffuse[0:3] = [1.0, 2.0, 3.0]
         self.assertEqual([1.0, 2.0, 3.0, 1.0], list(material[MaterialPropertyKey.COLOR_DIFFUSE]))
 
     def test_mutate_material_bool(self):
         scene = impasse.load(TEST_SKINNED_MODEL).copy_mutable()
-        material = scene.materials[0].as_mapping()
+        material = scene.materials[0]
         material[MaterialPropertyKey.TWOSIDED] = True
         self.assertTrue(material[MaterialPropertyKey.TWOSIDED])
 

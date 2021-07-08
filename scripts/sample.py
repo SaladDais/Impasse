@@ -66,7 +66,7 @@ def main(filename=None):
     print("MATERIALS:")
     for index, material in enumerate(scene.materials):
         print("  MATERIAL (id:" + str(index + 1) + ")")
-        for key, value in material.as_mapping().items():
+        for key, value in material.items():
             print("    %s: %s" % (key, value))
     print("")
 
@@ -81,7 +81,7 @@ def main(filename=None):
 
     print("METADATA:")
     if scene.metadata:
-        for key, value in scene.metadata.as_mapping().items():
+        for key, value in scene.metadata.items():
             print("    %s: %s" % (key, value))
 
 
