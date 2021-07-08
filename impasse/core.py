@@ -149,8 +149,8 @@ def export_blob(
                 from postprocessing, and the parameters can be combined bitwise to
                 generate the final processing value. Note that the default value will
                 triangulate quad faces. Example of generating other possible values:
-                processing = (impasse.postprocess.aiProcess_Triangulate |
-                              impasse.postprocess.aiProcess_OptimizeMeshes)
+                processing = (impasse.postprocess.ProcessingStep.Triangulate |
+                              impasse.postprocess.ProcessingStep.OptimizeMeshes)
     Returns
     ---------
     ExportDataBlob
