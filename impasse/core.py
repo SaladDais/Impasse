@@ -96,7 +96,7 @@ def load(
             raise AssimpError('File type must be specified when passing file objects!')
         data = file_or_name.read()
         model = _assimp_lib.aiImportFileFromMemory(
-            data, len(data), processing, file_type)
+            data, len(data), processing, file_type.encode())
     else:
         # a filename string has been passed
         model = _assimp_lib.aiImportFile(file_or_name.encode(sys.getfilesystemencoding()), processing)
