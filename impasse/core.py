@@ -171,7 +171,7 @@ def export_blob(
     if not export_blob_ptr:
         raise AssimpError('Could not export scene to blob!')
     # TODO: assimp's API for blobs is a little funky. Rather than releasing blobs
-    #  invidually you only release the head of the list. That means we should
+    #  individually you only release the head of the list. That means we should
     #  make sure the head doesn't die until the last child node has died.
     #  Should maybe replace struct `scene` member with an `owner` member.
 
