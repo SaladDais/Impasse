@@ -308,7 +308,7 @@ class SerializableMapping(SerializableStruct, Mapping[_K, _V], abc.ABC):
         val = SerializableStruct.__eq__(self, other)
         if val is not NotImplemented:
             return val
-        return Mapping.__eq__(self, other)
+        return dict(self) == other
 
 
 class BaseAccessor(Generic[_T], abc.ABC):
