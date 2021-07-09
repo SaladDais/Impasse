@@ -1094,7 +1094,7 @@ class Mesh(SerializableStruct):
     @note 4D coords are not supported
     """
 
-    faces: BaseSequence[Face] = DynamicSequenceAccessor('mFaces', 'mNumFaces', Face)
+    faces: BaseSequence[BaseSequence[int]] = DynamicSequenceAccessor('mFaces', 'mNumFaces', ProxyAdapter(Face, 'indices'))
     """
     The faces the mesh is constructed from.
     Each face refers to a number of vertices by their indices.

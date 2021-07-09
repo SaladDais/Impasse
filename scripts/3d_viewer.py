@@ -605,7 +605,7 @@ class Impasse3DViewer:
         gl["faces"] = glGenBuffers(1)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, gl["faces"])
         glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-                     numpy.array([x.indices for x in mesh.faces], dtype=numpy.int32),
+                     numpy.array(mesh.faces, dtype=numpy.int32),
                      GL_STATIC_DRAW)
 
         gl["nbfaces"] = len(mesh.faces)

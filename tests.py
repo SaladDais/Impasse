@@ -161,6 +161,16 @@ class ImpasseTests(unittest.TestCase):
         scene = impasse.load(TEST_MDL_TEXTURED)
         self.assertEqual(scene.textures[0].data.shape, (1114, 1272, 4))
 
+    def test_access_indices(self):
+        scene = impasse.load(TEST_COLLADA).copy_mutable()
+        self.assertEqual(2, scene.meshes[0].faces[0][2])
+        self.assertSequenceEqual([0, 1, 2], scene.meshes[0].faces[0])
+
+    def test_modify_indices(self):
+        scene = impasse.load(TEST_COLLADA).copy_mutable()
+        scene.meshes[0].faces[0][2] = 3
+        self.assertEqual(3, scene.meshes[0].faces[0][2])
+
 
 if __name__ == "__main__":
     unittest.main()

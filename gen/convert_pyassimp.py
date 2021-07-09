@@ -308,6 +308,9 @@ def print_code():
             elif struct_cls_name == "ExportDataBlob" and field_name == "data":
                 type_sig = "Union[bytearray]"
                 accessor = "BoundedBufferAccessor('data', 'size')"
+            elif struct_cls_name == "Mesh" and field_name == "mFaces":
+                type_sig = "BaseSequence[BaseSequence[int]]"
+                accessor = "DynamicSequenceAccessor('mFaces', 'mNumFaces', ProxyAdapter(Face, 'indices'))"
             elif type_data.full_sig.startswith("struct ") or adapter_name != "None":
                 if call_spec:
                     call_spec += ", "

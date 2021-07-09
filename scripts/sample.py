@@ -59,7 +59,7 @@ def main(filename=None):
         else:
             print("    no texture coordinates")
         print("    uv-component-count:" + str(len(mesh.num_uv_components)))
-        print("    faces:" + str(len(mesh.faces)) + " -> first:\n" + str([tuple(f.indices) for f in mesh.faces[:3]]))
+        print("    faces:" + str(len(mesh.faces)) + " -> first:\n" + str(numpy.array(mesh.faces[:3])))
         print("    bones:" + str(len(mesh.bones)) + " -> first:" + str([str(b) for b in mesh.bones[:3]]))
         print("")
 

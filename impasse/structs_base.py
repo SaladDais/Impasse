@@ -214,6 +214,21 @@ class TextureIndexAdapter(CSerializableBase):
         instance[0] = val
 
 
+class ProxyAdapter(CSerializableBase):
+    """Proxy gets and sets to an inner attr of an adapted value"""
+    __slots__ = ("adapter", "child_name")
+
+    def __init__(self, adapter, child_name: str):
+        self.adapter: Union[CSerializableBase, Type[CSerializableBase]] = adapter
+        self.child_name = child_name
+
+    def from_c(self, val, scene: Optional[Scene] = None):
+        return getattr(self.adapter.from_c(val, scene), self.child_name)
+
+    def to_c(self, instance, val):
+        return setattr(self.adapter.from_c(val, None), self.child_name, val)
+
+
 _T = TypeVar("_T")
 _SEQ_T = TypeVar("_SEQ_T", bound=Sequence)
 
