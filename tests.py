@@ -1,10 +1,12 @@
 import os.path
 import tempfile
 import unittest
+from io import BytesIO
 
 import numpy
 
 import impasse
+from impasse.errors import AssimpError
 from impasse.helper import get_bounding_box
 from impasse.structs import Scene
 from impasse.constants import TextureSemantic, MaterialPropertyKey
@@ -30,6 +32,14 @@ class ImpasseTests(unittest.TestCase):
 
     def test_collada_parses(self):
         self.assertIsNotNone(impasse.load(TEST_COLLADA).root_node)
+
+    def test_load_from_file_like(self):
+        stream = BytesIO()
+        with open(TEST_COLLADA, "rb") as f:
+            stream.write(f.read())
+        stream.seek(0)
+        scene = impasse.load(stream, "collada")
+        self.assertIsNotNone(scene.root_node)
 
     def test_materials_mapping(self):
         scene = impasse.load(TEST_COLLADA)
@@ -170,6 +180,43 @@ class ImpasseTests(unittest.TestCase):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
         scene.meshes[0].faces[0][2] = 3
         self.assertEqual(3, scene.meshes[0].faces[0][2])
+
+    def test_mapping_equality(self):
+        scene = impasse.load(TEST_COLLADA)
+        self.assertEqual(scene.materials[0], scene.materials[0])
+        # raises because dict contains numpy arrays, which don't support __eq__
+        with self.assertRaises(ValueError):
+            self.assertNotEqual(scene.materials[0], dict(scene.materials[0]))
+        self.assertNotEqual(scene.materials[0], scene.materials[1])
+        # Only strings, dict comparison works fine.
+        self.assertEqual(scene.metadata, dict(scene.metadata))
+
+    def test_bad_mapping_key(self):
+        scene = impasse.load(TEST_COLLADA)
+        with self.assertRaises(KeyError):
+            # Can't add new keys yet, only replace existing ones
+            scene.metadata["Foo"] = "bar"
+        with self.assertRaises(KeyError):
+            scene.metadata["Foo"]  # noqa
+        with self.assertRaises(KeyError):
+            # Can't add new keys yet, only replace existing ones
+            scene.materials[0]["Foo"] = "bar"
+        with self.assertRaises(KeyError):
+            scene.materials[0]["Foo"]  # noqa
+
+    def test_sequence_slices(self):
+        scene = impasse.load(TEST_COLLADA)
+        sliced = scene.meshes[0].faces[:1]
+        self.assertEqual(1, len(sliced))
+        self.assertSequenceEqual([0, 1, 2], sliced[0])
+
+    def test_bad_export_format(self):
+        scene = impasse.load(TEST_COLLADA)
+        with self.assertRaises(AssimpError):
+            impasse.export_blob(scene, "foobar")
+        with tempfile.NamedTemporaryFile() as f:
+            with self.assertRaises(AssimpError):
+                impasse.export(scene, f.name, "foobar")
 
 
 if __name__ == "__main__":
