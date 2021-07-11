@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+import inspect
 from typing import *
 
 import cffi
@@ -91,6 +92,17 @@ class SerializableStruct(CSerializableBase):
         if not isinstance(other, SerializableStruct):
             return NotImplemented
         return other.struct == self.struct
+
+    def __repr__(self):
+        field_names = []
+        for attr_name, attr_val in inspect.getmembers(self.__class__):
+            if isinstance(attr_val, BaseAccessor):
+                field_names.append(attr_name)
+        field_vals = {k: getattr(self, k) for k in field_names}
+        field_reprs = ", ".join(f"{k}={v!r}" for (k, v) in field_vals.items())
+        if field_reprs:
+            field_reprs = " " + field_reprs
+        return f"<{self.__class__.__name__}{field_reprs}>"
 
 
 class LazyStruct(NamedTuple):
