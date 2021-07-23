@@ -99,7 +99,19 @@ class SerializableStruct(CSerializableBase):
             if isinstance(attr_val, BaseAccessor):
                 field_names.append(attr_name)
         field_vals = {k: getattr(self, k) for k in field_names}
-        field_reprs = ", ".join(f"{k}={v!r}" for (k, v) in field_vals.items())
+        field_reprs = ""
+        for k, v in field_vals.items():
+            # Prevent infinite recursion in recursive structures,
+            # only print members' types and addresses
+            if isinstance(v, SerializableStruct):
+                v = repr(v.struct)
+            elif isinstance(v, BaseSequence):
+                v = f"<{v.__class__.__name__} len={len(v)}>"
+            else:
+                v = repr(v)
+            if field_reprs:
+                field_reprs += ", "
+            field_reprs += f"{k}={v}"
         if field_reprs:
             field_reprs = " " + field_reprs
         return f"<{self.__class__.__name__}{field_reprs}>"

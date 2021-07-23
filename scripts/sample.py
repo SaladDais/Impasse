@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def recur_node(node, level=0):
-    print("  " + "\t" * level + "- " + str(node))
+    print("  " + "\t" * level + "-", node.name)
     for child in node.children:
         recur_node(child, level + 1)
 

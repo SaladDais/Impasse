@@ -334,11 +334,6 @@ def print_code():
                         else:
                             print("")
                     print('    """')
-        # TODO: Mix-in classes instead?
-        if "mName" in fields_type_data:
-            print("")
-            print("    def __repr__(self):")
-            print("        return f'{self.__class__.__name__}<name={self.name!r}>'")
         print("\n")
     print("ffi.cdef(FUNCTION_DECLS + C_SRC)")
 

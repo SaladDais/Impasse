@@ -522,9 +522,6 @@ class Node(SerializableStruct):
     Whether any metadata is generated depends on the source file format.
     """
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
-
 
 C_SRC += """
 // See 'light.h' for details.
@@ -679,9 +676,6 @@ class Light(SerializableStruct):
 
     size: numpy.ndarray = SimpleAccessor(name='mSize', adapter=Vector2D)
     """Size of area light source."""
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
 
 
 C_SRC += """
@@ -915,9 +909,6 @@ class Bone(SerializableStruct):
     offset_matrix: numpy.ndarray = SimpleAccessor(name='mOffsetMatrix', adapter=Matrix4x4)
     """ Matrix that transforms from mesh space to bone space in bind pose"""
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
-
 
 C_SRC += """
 // See 'mesh.h' for details.
@@ -969,9 +960,6 @@ class AnimMesh(SerializableStruct):
 
     weight: float = SimpleAccessor(name='mWeight')
     """Weight of the AnimMesh."""
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
 
 
 C_SRC += """
@@ -1144,9 +1132,6 @@ class Mesh(SerializableStruct):
     method: int = SimpleAccessor(name='mMethod')
     """Method of morphing when animeshes are specified."""
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
-
 
 C_SRC += """
 // See 'camera.h' for details.
@@ -1234,9 +1219,6 @@ class Camera(SerializableStruct):
     0 if the aspect ratio is not defined in the source file.
     0 is also the default value.
     """
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
 
 
 C_SRC += """
@@ -1398,9 +1380,6 @@ class MeshAnim(SerializableStruct):
     keys: BaseSequence[MeshKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshKey)
     """Key frames of the animation. May not be NULL."""
 
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
-
 
 C_SRC += """
 // See 'anim.h' for details.
@@ -1426,9 +1405,6 @@ class MeshMorphAnim(SerializableStruct):
 
     keys: BaseSequence[MeshMorphKey] = DynamicSequenceAccessor('mKeys', 'mNumKeys', MeshMorphKey)
     """Key frames of the animation. May not be NULL."""
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
 
 
 C_SRC += """
@@ -1481,9 +1457,6 @@ class Animation(SerializableStruct):
     The morph mesh animation channels. Each channel affects a single mesh.
     The array is mNumMorphMeshChannels in size.
     """
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}<name={self.name!r}>'
 
 
 C_SRC += """
