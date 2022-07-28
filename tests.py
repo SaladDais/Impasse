@@ -11,7 +11,7 @@ from impasse.helper import get_bounding_box
 from impasse.structs import Scene
 from impasse.constants import TextureSemantic, MaterialPropertyKey
 
-# Find the root path of the test file so we can find the
+# Find the root path of the test file, so we can find the
 # test models above our directory
 
 HERE = os.path.abspath(os.path.dirname(__file__))
@@ -28,7 +28,8 @@ class ImpasseTests(unittest.TestCase):
         self.assertIsNotNone(scene.root_node)
         self.assertEqual(len(scene.meshes), 1)
         bone_names = [b.name for b in scene.meshes[0].bones]
-        self.assertEqual(["nodes_1", "nodes_2"], bone_names)
+        # assimp changed how it autogenerates names in newer versions. Handle either case.
+        self.assertTrue(bone_names == ["nodes_1", "nodes_2"] or bone_names == ["nodes[1]", "nodes[2]"])
 
     def test_collada_parses(self):
         self.assertIsNotNone(impasse.load(TEST_COLLADA).root_node)
