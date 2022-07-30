@@ -129,8 +129,6 @@ class ImpasseTests(unittest.TestCase):
     def test_mutate_diffuse_color(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
         material = scene.materials[1]
-        diffuse = material[MaterialPropertyKey.COLOR_DIFFUSE]
-        print(diffuse)
         material[MaterialPropertyKey.COLOR_DIFFUSE] = [1.0, 2.0, 3.0, 1.0]
         diffuse = material[MaterialPropertyKey.COLOR_DIFFUSE]
         self.assertEqual([1.0, 2.0, 3.0, 1.0], list(diffuse))
@@ -176,6 +174,14 @@ class ImpasseTests(unittest.TestCase):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
         self.assertEqual(2, scene.meshes[0].faces[0][2])
         self.assertSequenceEqual([0, 1, 2], scene.meshes[0].faces[0])
+
+    def test_assign_numpy_array_after_no_scene_references(self):
+        scene = impasse.load(TEST_COLLADA).copy_mutable()
+        transform = scene.root_node.children[0].transformation
+        # Should trigger a release of all scene resources if this was the last strong reference,
+        scene = None
+        # Will trigger a valgrind error if the scene released its memory
+        transform[0][0] = 1
 
     def test_modify_indices(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import abc
 import inspect
+import weakref
 from typing import *
 
 import cffi
@@ -13,6 +14,15 @@ if TYPE_CHECKING:
     from .structs import Texture, MaterialProperty, MetadataEntry, Material, Scene, Mesh
 
 ffi = cffi.FFI()
+
+
+# A map of FFI.CData -> Scene that keeps the scene alive as long as some CData stemming
+# from Scene memory is still referenced. Might seem nasty, but this is the officially
+# sanctioned way of doing things!
+# https://cffi.readthedocs.io/en/latest/using.html#working-with-pointers-structures-and-arrays
+# Only needed when we return things that can't themselves hold strong references to the Scene
+# object, like numpy arrays.
+_live_scene_referents_map = weakref.WeakKeyDictionary()
 
 
 class CSerializableBase(abc.ABC):
@@ -147,7 +157,11 @@ class NumPyStruct(SerializableStruct):
 
     @classmethod
     def from_c(cls, struct_val, scene: Optional[Scene] = None):
-        buf = ffi.buffer(ffi.addressof(struct_val), cls.get_size())
+        assert scene is not None
+        cdata = ffi.addressof(struct_val)
+        _live_scene_referents_map[cdata] = scene
+        # NumPy will keep a strong reference to this in its `.base` attr
+        buf = ffi.buffer(cdata, cls.get_size())
         arr = numpy.ndarray(buffer=buf, shape=cls.SHAPE, dtype=cls.DTYPE)
         arr.flags.writeable = scene is None or not scene.readonly
         return arr
