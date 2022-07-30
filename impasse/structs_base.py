@@ -579,11 +579,10 @@ class MaterialPropertyDataAccessor(SimpleAccessor[MATERIAL_PROP_VALUE]):
             buf[:] = arr.flatten().data
             return arr
         elif obj.struct.mType == MaterialPropertyType.AISTRING:
-            str_ptr = ffi.cast("struct aiMaterialPropertyString *", obj.struct.mData)
-            StringAdapter.to_c(str_ptr, value)
-            # data length only reflects the parts of the struct we're using,
-            # not the actual alloc size.
-            obj.struct.mDataLength = str_ptr.length + 1 + ffi.sizeof("int")
+            # TODO: These are really annoying to change, and the API has changed quite a bit between versions.
+            #  They used to be structs (with possible padding,) but now they're length-prefixed buffers.
+            #  They aren't `aiString`s, so we need to realloc if we want to store a longer version.
+            raise KeyError(f"Can't set string property: {obj}")
         elif obj.struct.mType == MaterialPropertyType.BINARY:
             if not isinstance(value, (bytes, memoryview, bytearray)):
                 value = bytes((value,))

@@ -56,8 +56,8 @@ class ImpasseTests(unittest.TestCase):
     def test_mutate_materials_mapping(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
         material_map = scene.materials[0]
-        material_map["?mat.name"] = "BluePlastic"
-        self.assertEqual(material_map["?mat.name", TextureSemantic.NONE], "BluePlastic")
+        with self.assertRaises(KeyError):
+            material_map["?mat.name"] = "BluPlastic"
 
     def test_metadata_mapping(self):
         scene = impasse.load(TEST_COLLADA)
