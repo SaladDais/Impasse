@@ -1,6 +1,7 @@
 import os.path
 import tempfile
 import unittest
+import weakref
 from io import BytesIO
 
 import numpy
@@ -178,10 +179,16 @@ class ImpasseTests(unittest.TestCase):
     def test_assign_numpy_array_after_no_scene_references(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
         transform = scene.root_node.children[0].transformation
+        scene_ref = weakref.ref(scene)
         # Should trigger a release of all scene resources if this was the last strong reference,
-        scene = None
+        scene = None  # noqa
+        # But the scene should _not_ have been released since we still have a live numpy array
+        self.assertIsNotNone(scene_ref())
         # Will trigger a valgrind error if the scene released its memory
         transform[0][0] = 1
+        transform = None  # noqa
+        # Releasing the last numpy array should have triggered a release of the scene
+        self.assertIsNone(scene_ref())
 
     def test_modify_indices(self):
         scene = impasse.load(TEST_COLLADA).copy_mutable()
