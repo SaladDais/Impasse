@@ -1,7 +1,7 @@
 """
 Some fancy helper functions.
 """
-
+import math
 import os
 import ctypes
 import operator
@@ -28,8 +28,8 @@ def transform(vector3, matrix4x4):
 
 
 def get_bounding_box(scene: Scene):
-    bb_min = [1e10, 1e10, 1e10]  # x,y,z
-    bb_max = [-1e10, -1e10, -1e10]  # x,y,z
+    bb_min = [math.inf, math.inf, math.inf]  # x,y,z
+    bb_max = [-math.inf, -math.inf, -math.inf]  # x,y,z
     transformation = numpy.linalg.inv(scene.root_node.transformation)
     return get_bounding_box_for_node(scene, scene.root_node, bb_min, bb_max, transformation)
 
