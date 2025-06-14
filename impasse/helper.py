@@ -5,9 +5,9 @@ import math
 import os
 import ctypes
 import operator
-from distutils.sysconfig import get_python_lib
 import re
 import sys
+import sysconfig
 import logging
 
 import numpy
@@ -91,7 +91,7 @@ def get_search_config():
         # check if running from anaconda.
         anaconda_keywords = ("conda", "continuum")
         if any(k in sys.version.lower() for k in anaconda_keywords):
-            cur_path = get_python_lib()
+            cur_path = sysconfig.get_path("platlib")
             pattern = re.compile(r'.*/lib/')
             conda_lib = pattern.match(cur_path).group()
             logger.info("Adding Anaconda lib path:" + conda_lib)
