@@ -883,6 +883,8 @@ C_SRC += """
 // See 'mesh.h' for details.
 struct aiBone {
     struct aiString mName;
+    struct aiNode *mArmature;
+    struct aiNode *mNode;
     unsigned int mNumWeights;
     struct aiVertexWeight *mWeights;
     struct aiMatrix4x4 mOffsetMatrix;
@@ -896,6 +898,12 @@ class Bone(SerializableStruct):
 
     name: str = SimpleAccessor(name='mName', adapter=StringAdapter)
     """ The name of the bone."""
+
+    armature: Optional[Node] = SimpleAccessor(adapter=Node)
+    """ The bone armature node - used for skeleton conversion """
+
+    node: Optional[Node] = SimpleAccessor(adapter=Node)
+    """ The bone node in the scene - used for skeleton conversion """
 
     weights: BaseSequence[VertexWeight] = DynamicSequenceAccessor('mWeights', 'mNumWeights', VertexWeight)
     """ The vertices affected by this bone"""
@@ -977,6 +985,7 @@ struct aiMesh {
     unsigned int mNumAnimMeshes;
     struct aiAnimMesh **mAnimMeshes;
     unsigned int mMethod;
+    struct aiString **mTextureCoordsNames;
 };
 """
 
@@ -1125,6 +1134,11 @@ class Mesh(SerializableStruct):
 
     method: int = SimpleAccessor(name='mMethod')
     """Method of morphing when animeshes are specified."""
+
+    texture_coords_names: BaseSequence[Optional[str]] = StaticSequenceAccessor('mNumUVComponents', 8, StringAdapter)
+    """
+    Vertex UV stream names. Pointer to array of size AI_MAX_NUMBER_OF_TEXTURECOORDS
+    """
 
 
 C_SRC += """
